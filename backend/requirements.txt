@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+langchain
+openai
+pinecone-client
+sqlalchemy
+psycopg2-binary
+pydantic
+python-dotenv

@@ -1,0 +1,56 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+env/
+ENV/
+venv/
+
+# VS Code settings
+.vscode/
+.history/
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# dotenv environment file
+.env
+.env.local
+.env.*
+
+# SQLite DB or other local dev files (optional)
+*.db
+*.sqlite3
+
+# Log files
+*.log
+
+# Pydantic/mypy cache
+.mypy_cache/
+.pytest_cache/
+.pdm.toml
+poetry.lock
+pip-log.txt
+
+# PyInstaller
+*.spec
+
+# Coverage reports
+htmlcov/
+coverage.xml
+.cache
+.tox/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ruff / Black cache
+.ruff_cache/
