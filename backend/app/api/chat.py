@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.chat import ChatRequest, ChatResponse
-from app.services.memory_chain import generate_chat_response
+from app.services.memory_chain_service import generate_chat_response
 
 router = APIRouter()
 

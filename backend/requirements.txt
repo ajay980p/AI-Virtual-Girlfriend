@@ -2,7 +2,7 @@ fastapi
 uvicorn[standard]
 langchain
 openai
-pinecone-client
+pinecone
 sqlalchemy
 psycopg2-binary
 pydantic

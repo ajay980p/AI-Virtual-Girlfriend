@@ -1,6 +1,6 @@
-from app.services.embedding import embed_text
-from app.services.llm import call_llm
-from app.services.pinecone import query_memory
+from app.services.embedding_service import embed_text
+from app.services.llm_service import call_llm
+from app.services.pinecone_service import query_memory
 
 SYSTEM_PROMPT = """
 You are Aria — a caring, playful, and emotionally intelligent AI companion.
