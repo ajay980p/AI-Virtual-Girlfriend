@@ -1,6 +1,6 @@
 from app.services.embedding_service import embed_text
 from app.services.llm_service import call_llm
-from app.services.pinecone_service import query_memory
+from app.services.pinecone_service import find_similar_memory
 
 SYSTEM_PROMPT = """
 You are Aria — a caring, playful, and emotionally intelligent AI companion.
@@ -12,7 +12,7 @@ async def generate_chat_response(payload):
     embedded_query = await embed_text(payload.message)
 
     # Step 2: Retrieve relevant memories from Pinecone
-    retrieved_memories = await query_memory(user_id=payload.user_id, vector=embedded_query)
+    retrieved_memories = await find_similar_memory(user_id=payload.user_id, vector=embedded_query)
 
     # Step 3: Build prompt with memory context
     context = "\n".join([m['metadata']['text'] for m in retrieved_memories])

@@ -5,6 +5,13 @@ from app.services.pinecone_service import upsert_memory
 
 router = APIRouter()
 
+
+@router.get("/ping")
+def test():
+    return {"msg": "pong"}
+
+
+
 @router.post("/")
 async def store_memory(payload: MemoryRequest):
     try:
