@@ -4,80 +4,137 @@ import RecentChats from "@/components/dashboard/RecentChats";
 export default function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const greetingEmoji = hour < 12 ? "🌅" : hour < 18 ? "☀️" : "🌙";
+  const greetingEmoji = "👋";
+  const userName = "darling"; // Matching the reference design
 
   return (
-    <div className="grid gap-8 md:grid-cols-3 animate-fade-in">
-      <section className="md:col-span-2 space-y-8">
-        {/* Welcome Section */}
-        <div className="glass rounded-3xl p-8 border border-border/30 relative overflow-hidden group hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
-          {/* Decorative background elements */}
-          <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-gradient-to-br from-primary/20 to-secondary/10 blur-3xl group-hover:scale-110 transition-transform duration-700" />
-          <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-gradient-to-tr from-accent/20 to-primary/10 blur-2xl group-hover:scale-110 transition-transform duration-700" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent">
-                {greeting}, Ajay
-              </h2>
-              <span className="text-3xl animate-float">{greetingEmoji}</span>
-            </div>
-            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Ready when you are. Start a chat or pick up where you left off.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <a 
-                href="/chat" 
-                className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 active:scale-95"
-              >
-                <span>Start new chat</span>
-                <div className="transition-transform duration-200 group-hover:translate-x-1">→</div>
-              </a>
-              <button className="rounded-2xl glass border border-border/50 px-6 py-3 text-sm font-medium transition-all duration-200 hover:scale-105 hover:bg-card/80 hover:shadow-lg active:scale-95">
-                Daily check‑in
-              </button>
-              <button className="rounded-2xl glass border border-border/50 px-6 py-3 text-sm font-medium transition-all duration-200 hover:scale-105 hover:bg-card/80 hover:shadow-lg active:scale-95">
-                Import a doc
-              </button>
+    <div className="p-8 space-y-8">
+      {/* Welcome Section - matching reference exactly */}
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            {greeting}, {userName} {greetingEmoji}
+          </h1>
+          <p className="text-gray-400 text-lg">
+            Ready when you are. Start a chat or pick up where you left off.
+          </p>
+        </div>
+        
+        {/* Action Buttons - matching reference design */}
+        <div className="flex gap-4">
+          <a 
+            href="/chat" 
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+          >
+            💬 Start new chat →
+          </a>
+          <button className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-6 py-3 text-sm font-medium text-gray-300 hover:bg-gray-800 transition-colors">
+            📅 Daily check-in
+          </button>
+          <button className="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-6 py-3 text-sm font-medium text-gray-300 hover:bg-gray-800 transition-colors">
+            📄 Share a memory
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content Grid - matching reference layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* System Status - Left Column */}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold text-white mb-4">System Status</h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">AI Connection</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-green-500 text-sm font-medium">Online</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">Memory Sync</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-green-500 text-sm font-medium">Synced</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">Emotion Engine</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span className="text-yellow-500 text-sm font-medium">Learning...</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        
-        {/* Recent Chats Section */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          <RecentChats />
-        </div>
-      </section>
-      
-      <aside className="space-y-6">
-        {/* Health Card */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
-          <HealthCard />
-        </div>
-        
-        {/* Persona Card */}
-        <div className="glass rounded-3xl p-6 text-sm border border-border/30 relative overflow-hidden group hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 animate-slide-up" style={{ animationDelay: '0.6s' }}>
-          <div className="absolute -top-16 -right-16 h-32 w-32 rounded-full bg-gradient-to-br from-primary/10 to-secondary/5 blur-2xl group-hover:scale-110 transition-transform duration-500" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary to-secondary animate-pulse" />
-              <p className="font-bold text-lg">Persona</p>
+
+        {/* Personality - Right Column */}
+        <div className="space-y-6">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-purple-500">✨</span>
+              <h2 className="text-xl font-semibold text-white">Personality</h2>
             </div>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              Warm, witty, and a bit tech‑nerdy.
-            </p>
-            <div className="flex gap-2">
-              <button className="flex-1 rounded-xl glass border border-border/50 px-3 py-2 text-xs font-medium transition-all duration-200 hover:scale-105 hover:bg-card/50 hover:shadow-md active:scale-95">
-                More playful
-              </button>
-              <button className="flex-1 rounded-xl glass border border-border/50 px-3 py-2 text-xs font-medium transition-all duration-200 hover:scale-105 hover:bg-card/50 hover:shadow-md active:scale-95">
-                More practical
-              </button>
+            <p className="text-gray-400 mb-6">Warm, witty, and a bit tech-nerdy.</p>
+            
+            {/* Personality Sliders - matching reference */}
+            <div className="space-y-6">
+              {/* More playful - More practical slider */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">More playful</span>
+                  <span className="text-sm text-gray-400">More practical</span>
+                </div>
+                <div className="relative">
+                  <div className="w-full h-2 bg-gray-700 rounded-full"></div>
+                  <div className="absolute top-0 left-0 h-2 bg-primary rounded-full" style={{ width: '75%' }}></div>
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-white" style={{ left: '75%', marginLeft: '-8px' }}></div>
+                </div>
+              </div>
+              
+              {/* Emotional - Logical slider */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-400">Emotional</span>
+                  <span className="text-sm text-gray-400">Logical</span>
+                </div>
+                <div className="relative">
+                  <div className="w-full h-2 bg-gray-700 rounded-full"></div>
+                  <div className="absolute top-0 left-0 h-2 bg-primary rounded-full" style={{ width: '60%' }}></div>
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-white" style={{ left: '60%', marginLeft: '-8px' }}></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </aside>
+      </div>
+
+      {/* Recent Conversations - matching reference */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-white">Recent conversations</h2>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:bg-gray-800/50 transition-colors">
+            <div>
+              <h3 className="font-medium text-white mb-1">Planning our weekend stargazing trip</h3>
+              <p className="text-sm text-gray-400">Let's find the perfect spot away from city lights...</p>
+            </div>
+            <button className="px-4 py-2 text-sm font-medium text-gray-300 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors">
+              Continue
+            </button>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:bg-gray-800/50 transition-colors">
+            <div>
+              <h3 className="font-medium text-white mb-1">Coffee recommendations</h3>
+              <p className="text-sm text-gray-400">You asked about the best local coffee shops...</p>
+            </div>
+            <button className="px-4 py-2 text-sm font-medium text-gray-300 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors">
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
