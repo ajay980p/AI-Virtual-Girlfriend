@@ -36,8 +36,8 @@ except Exception as e:
 
 
 # 1. Find similar memory by cosine similarity
-def find_similar_memory(user_id: str, vector: list[float], threshold: float = 0.9) -> Optional[str]:
-    """Find the most similar memory vector for a given user using cosine similarity.
+def find_similar_memory_id(user_id: str, vector: list[float], threshold: float = 0.9) -> Optional[str]:
+    """Find the most similar memory vector ID for a given user using cosine similarity.
 
     Args:
         user_id (str): The ID of the user whose memories to search within.
@@ -61,6 +61,27 @@ def find_similar_memory(user_id: str, vector: list[float], threshold: float = 0.
     return None
 
 
+# 2. Find similar memories for chat context (async)
+async def find_similar_memory(user_id: str, vector: list[float], top_k: int = 5) -> list[dict]:
+    """Find similar memories for a given user to use as chat context.
+
+    Args:
+        user_id (str): The ID of the user whose memories to search within.
+        vector (list[float]): The embedding vector to compare against stored vectors.
+        top_k (int, optional): Number of similar memories to return. Defaults to 5.
+
+    Returns:
+        list[dict]: List of similar memory matches with metadata.
+    """
+    result = index.query(
+        vector=vector,
+        top_k=top_k,
+        include_metadata=True,
+        filter={"user_id": user_id}
+    )
+    return result.get("matches", [])
+
+
 
 # 2. Upsert memory (create or update)
 def upsert_memory(user_id: str, vector: list[float], text: str, memory_type: str = "conversation") -> None:
@@ -79,7 +100,7 @@ def upsert_memory(user_id: str, vector: list[float], text: str, memory_type: str
     Returns:
         None: The function performs an upsert operation directly into Pinecone.
     """
-    existing_id = find_similar_memory(user_id, vector)
+    existing_id = find_similar_memory_id(user_id, vector)
     timestamp = datetime.utcnow().isoformat()
 
     vector_id = existing_id or f"{user_id}-{abs(hash(text))}"

@@ -8,9 +8,9 @@ app = FastAPI(
     version="0.1.0" 
 )
 
-@router.get("/ping")
+@router.get("/")
 def test():
-    return {"msg": "pong"}
+    return {"msg": "This is the root endpoint!"}
 
 # Register API routes
 app.include_router(router, tags=["Test"])
