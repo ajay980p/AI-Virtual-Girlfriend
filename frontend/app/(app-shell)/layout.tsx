@@ -14,36 +14,58 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     return (
       <Link
         href={href}
-        className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition ${
-          active ? "bg-primary/10 text-primary" : "hover:bg-muted"
+        className={`group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+          active 
+            ? "bg-gradient-to-r from-primary/20 to-primary/10 text-primary shadow-lg shadow-primary/10 border border-primary/20" 
+            : "hover:bg-card/50 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
         }`}
       >
-        <Icon className="h-4 w-4" /> {label}
+        <Icon className={`h-5 w-5 transition-transform duration-200 ${
+          active ? "scale-110" : "group-hover:scale-110"
+        }`} /> 
+        <span className="font-semibold">{label}</span>
+        {active && (
+          <div className="ml-auto h-2 w-2 rounded-full bg-primary animate-pulse" />
+        )}
       </Link>
     );
   };
 
   return (
-    <div className="grid min-h-screen grid-cols-1 md:grid-cols-[260px_1fr]">
+    <div className="grid min-h-screen grid-cols-1 md:grid-cols-[280px_1fr]">
       {/* Sidebar */}
-      <aside className={`border-r bg-card p-3 ${open ? "block" : "hidden md:block"}`}>
-        <div className="flex items-center justify-between p-2">
-          <div className="flex items-center gap-2 font-semibold">
-            <Brain className="h-5 w-5" /> Aria
+      <aside className={`glass border-r border-border/50 p-4 backdrop-blur-xl ${open ? "block" : "hidden md:block"}`}>
+        <div className="flex items-center justify-between p-3">
+          <div className="flex items-center gap-3 font-bold text-lg">
+            <div className="relative">
+              <Brain className="h-8 w-8 text-primary animate-pulse" />
+              <div className="absolute inset-0 h-8 w-8 text-primary/30 animate-ping" />
+            </div>
+            <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              Aria
+            </span>
           </div>
-          <button className="md:hidden" onClick={() => setOpen(false)}>
+          <button 
+            className="md:hidden p-2 rounded-xl hover:bg-card/50 transition-colors" 
+            onClick={() => setOpen(false)}
+          >
             <Menu className="h-5 w-5" />
           </button>
         </div>
-        <nav className="mt-2 grid gap-1">
+        <nav className="mt-6 space-y-2">
           <NavItem href="/dashboard" label="Dashboard" icon={Home} />
           <NavItem href="/chat" label="Chat" icon={MessageSquare} />
           <NavItem href="/settings" label="Settings" icon={Cog} />
         </nav>
-        <div className="mt-4 rounded-xl border p-3 text-xs text-muted-foreground">
-          <p className="font-medium text-foreground">Today I remember…</p>
-          <p className="mt-1">You like coding late and masala oats 🥣</p>
-          <button className="mt-2 w-full rounded-lg bg-muted px-2 py-1 text-left text-xs hover:bg-muted/70">
+        <div className="mt-8 glass rounded-2xl p-4 text-sm border border-border/30">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-2 w-2 rounded-full bg-gradient-to-r from-primary to-secondary animate-pulse" />
+            <p className="font-semibold text-foreground">Today I remember…</p>
+          </div>
+          <p className="text-muted-foreground mb-3 leading-relaxed">
+            You like coding late and masala oats 🥣
+          </p>
+          <button className="w-full rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 border border-primary/20 px-3 py-2 text-xs font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
             Add something to remember
           </button>
         </div>
@@ -52,30 +74,42 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       {/* Main */}
       <div className="flex min-h-screen flex-col">
         {/* Topbar */}
-        <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2">
-              <button className="md:hidden" onClick={() => setOpen(true)}>
+        <header className="sticky top-0 z-20 glass border-b border-border/30 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <div className="flex items-center gap-3">
+              <button 
+                className="md:hidden p-2 rounded-xl hover:bg-card/50 transition-colors" 
+                onClick={() => setOpen(true)}
+              >
                 <Menu className="h-5 w-5" />
               </button>
-              <h1 className="text-sm font-semibold text-muted-foreground">
+              <h1 className="text-lg font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                 {pathname.startsWith("/chat") ? "Chat" : pathname.startsWith("/settings") ? "Settings" : "Dashboard"}
               </h1>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-2 text-sm">
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500">
-                  <span className="absolute -inset-1 animate-ping rounded-full bg-emerald-500/60" />
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-emerald-400/10 border border-emerald-500/20">
+                <div className="relative">
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500">
+                    <span className="absolute -inset-1 animate-ping rounded-full bg-emerald-500/60" />
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                  Aria is online
                 </span>
-                Aria is online
-              </span>
-              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-primary/40" />
+              </div>
+              <div className="relative group">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary via-primary/80 to-secondary shadow-lg ring-2 ring-primary/20 transition-all duration-200 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/20" />
+                <div className="absolute inset-0 h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 blur-md group-hover:blur-lg transition-all duration-200" />
+              </div>
             </div>
           </div>
         </header>
 
         {/* Content */}
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8 animate-fade-in">
+          {children}
+        </main>
       </div>
     </div>
   );
