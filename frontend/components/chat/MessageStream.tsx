@@ -2,12 +2,35 @@
 
 import { useChatStore } from "@/store/chat.store";
 import { useUIStore } from "@/store/ui.store";
+import { useState, useEffect } from "react";
+import { chatAPI } from "@/lib/api";
 
 export default function MessageStream() {
   const activeThreadId = useChatStore((s) => s.activeThreadId);
   const messages = useChatStore((s) => (activeThreadId ? s.messagesByThread[activeThreadId] || [] : []));
+  const isLoading = useChatStore((s) => s.isLoading);
+  const error = useChatStore((s) => s.error);
   const reflecting = useUIStore((s) => s.reflecting);
   const typing = useUIStore((s) => s.assistantTyping);
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
+
+  // Check backend connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        await chatAPI.healthCheck();
+        setConnectionStatus('connected');
+      } catch (error) {
+        console.error('Backend connection failed:', error);
+        setConnectionStatus('disconnected');
+      }
+    };
+
+    checkConnection();
+    // Recheck every 30 seconds
+    const interval = setInterval(checkConnection, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (!activeThreadId) {
     return (
@@ -21,6 +44,19 @@ export default function MessageStream() {
             <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
               Choose a conversation from the sidebar or create a new one to begin chatting with Aria.
             </p>
+            {/* Connection Status */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs">
+              <div className={`h-2 w-2 rounded-full ${
+                connectionStatus === 'connected' ? 'bg-green-500 animate-pulse' :
+                connectionStatus === 'disconnected' ? 'bg-red-500' :
+                'bg-yellow-500 animate-pulse'
+              }`} />
+              <span className="text-muted-foreground">
+                Backend: {connectionStatus === 'connected' ? 'Connected' :
+                        connectionStatus === 'disconnected' ? 'Disconnected' :
+                        'Checking...'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -85,7 +121,7 @@ export default function MessageStream() {
           <div className="group max-w-[85%]">
             <div className="glass border border-border/30 bg-card/50 backdrop-blur-sm rounded-3xl px-6 py-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Aria is typing</span>
+                <span className="text-sm text-muted-foreground">Aria is thinking</span>
                 <div className="flex items-center gap-1">
                   <span className="inline-flex h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
                   <span className="inline-flex h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />

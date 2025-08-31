@@ -2,8 +2,9 @@ import os
 import logging
 from typing import List
 from dotenv import load_dotenv
-# Correct import for calling the Hugging Face API endpoint
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+import requests
+import asyncio
+import aiohttp
 
 # Load environment variables from .env file
 load_dotenv()
@@ -11,12 +12,13 @@ load_dotenv()
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# --- 1. Initialize the LangChain client ONCE ---
-embeddings_client = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+# HuggingFace API configuration
+HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY")  # Optional, for better rate limits
 
 async def embed_text(text: str) -> List[float]:
     """
-    Generates a vector embedding for the given text using the LangChain client.
+    Generates a vector embedding for the given text using HuggingFace API.
     
     Args:
         text (str): The input text to generate embeddings for.
@@ -31,22 +33,33 @@ async def embed_text(text: str) -> List[float]:
     if not text or not text.strip():
         raise ValueError("Input text cannot be empty.")
 
+    headers = {"Content-Type": "application/json"}
+    if HF_API_KEY:
+        headers["Authorization"] = f"Bearer {HF_API_KEY}"
+    
+    payload = {"inputs": text.strip()}
+    
     try:
-        # --- 2. Use the async method from the LangChain client ---
-        embedding_vector = await embeddings_client.aembed_query(text.strip())
-        
-        if not embedding_vector:
-            raise ValueError("Received empty embedding vector from API.")
-            
-        logger.info(f"Successfully generated embedding for text of length {len(text)}")
-        return embedding_vector
-        
-    except ConnectionError as e:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(HF_API_URL, json=payload, headers=headers) as response:
+                if response.status != 200:
+                    error_text = await response.text()
+                    raise ConnectionError(f"HuggingFace API error {response.status}: {error_text}")
+                
+                result = await response.json()
+                
+                # HuggingFace returns the embedding directly for feature extraction
+                if isinstance(result, list) and len(result) > 0:
+                    embedding_vector = result[0] if isinstance(result[0], list) else result
+                    logger.info(f"Successfully generated embedding for text of length {len(text)}")
+                    return embedding_vector
+                else:
+                    raise ValueError("Received invalid embedding response from HuggingFace API.")
+                    
+    except aiohttp.ClientError as e:
         logger.error(f"Connection error during embedding generation: {e}")
         raise ConnectionError(f"Failed to connect to HuggingFace API: {str(e)}")
     except Exception as e:
-        # LangChain will raise its own specific errors, but a general
-        # catch-all is good for robustness.
         logger.error(f"An error occurred during embedding: {e}")
         raise ValueError(f"Failed to generate embedding: {str(e)}")
 
@@ -77,25 +90,14 @@ async def embed_texts_batch(texts: List[str]) -> List[List[float]]:
         if not text or not text.strip():
             raise ValueError(f"Text at index {i} cannot be empty.")
     
-    try:
-        # Strip whitespace from all texts
-        cleaned_texts = [text.strip() for text in texts]
-        
-        # --- Use the batch embedding method ---
-        embedding_vectors = await embeddings_client.aembed_documents(cleaned_texts)
-        
-        if not embedding_vectors or len(embedding_vectors) != len(texts):
-            raise ValueError("Received invalid batch embedding response from API.")
-            
-        logger.info(f"Successfully generated embeddings for {len(texts)} texts")
-        return embedding_vectors
-        
-    except ConnectionError as e:
-        logger.error(f"Connection error during batch embedding generation: {e}")
-        raise ConnectionError(f"Failed to connect to HuggingFace API: {str(e)}")
-    except Exception as e:
-        logger.error(f"An error occurred during batch embedding: {e}")
-        raise ValueError(f"Failed to generate batch embeddings: {str(e)}")
+    # For now, process texts one by one (can be optimized later)
+    embeddings = []
+    for text in texts:
+        embedding = await embed_text(text)
+        embeddings.append(embedding)
+    
+    logger.info(f"Successfully generated embeddings for {len(texts)} texts")
+    return embeddings
 
 
 

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
 from app.api import chat, memory, user
 
 router = APIRouter()
@@ -6,6 +7,15 @@ router = APIRouter()
 app = FastAPI(
     title="Project Aria – AI Virtual Girlfriend",
     version="0.1.0" 
+)
+
+# Add CORS middleware to allow frontend communication
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Frontend URLs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @router.get("/")

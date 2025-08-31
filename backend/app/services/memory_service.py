@@ -1,6 +1,9 @@
-from app.services.embedding_service import embed_text, embed_texts_batch
-from app.services.llm_service import call_llm
-from app.services.pinecone_service import find_similar_memory, upsert_memory
+# Use mock services for testing
+from app.services.mock_embedding_service import embed_text, embed_texts_batch
+from app.services.mock_llm_service import call_llm
+from app.services.mock_pinecone_service import find_similar_memory, upsert_memory
+print("⚠️  Using all mock services for testing")
+
 import logging
 
 # Set up logging

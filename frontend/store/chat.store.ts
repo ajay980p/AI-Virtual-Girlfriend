@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import type { Thread } from "@/types/thread";
 import type { Message } from "@/types/message";
 import { useUIStore } from "./ui.store";
+import { chatAPI, BackendAPIError } from "@/lib/api";
 
 type MessagesByThread = Record<string, Message[]>;
 
@@ -14,10 +15,14 @@ type ChatState = {
   threads: Thread[];
   messagesByThread: MessagesByThread;
   activeThreadId: string | null;
+  userId: string;
+  isLoading: boolean;
+  error: string | null;
   createThread: () => void;
   selectThread: (id: string) => void;
-  sendMessage: (threadId: string, opts: SendOptions) => void;
+  sendMessage: (threadId: string, opts: SendOptions) => Promise<void>;
   togglePin: (threadId: string, messageId: string) => void;
+  clearError: () => void;
 };
 
 const seedThread: Thread = {
@@ -36,6 +41,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   threads: [seedThread],
   messagesByThread: { [seedThread.id]: seedMessages },
   activeThreadId: seedThread.id,
+  userId: nanoid(), // Generate unique user ID
+  isLoading: false,
+  error: null,
 
   createThread: () => {
     const id = nanoid();
@@ -54,8 +62,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   selectThread: (id) => set({ activeThreadId: id }),
 
-  sendMessage: (threadId, { content, vibe }) => {
+  sendMessage: async (threadId, { content, vibe }) => {
+    const { userId } = get();
     const ui = useUIStore.getState();
+    
+    // Clear any previous errors
+    set({ error: null });
+    
+    // Add user message immediately
     const userMsg: Message = { id: nanoid(), role: "user", content, createdAt: Date.now() };
     set((s) => {
       const msgs = (s.messagesByThread[threadId] || []).concat(userMsg);
@@ -65,22 +79,61 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return { messagesByThread: { ...s.messagesByThread, [threadId]: msgs }, threads };
     });
 
-    // Simulate assistant typing and reply
+    // Set loading and typing states
+    set({ isLoading: true });
     ui.setTyping(true);
-    const reply = setTimeout(() => {
-      const assistantText = `(${vibe || "Neutral"}) Got it! You said: "${content}".`;
-      const asstMsg: Message = { id: nanoid(), role: "assistant", content: assistantText, createdAt: Date.now() };
+
+    try {
+      // Call backend API
+      const response = await chatAPI.sendMessage(userId, content);
+      
+      // Add assistant response
+      const assistantMsg: Message = { 
+        id: nanoid(), 
+        role: "assistant", 
+        content: response.response, 
+        createdAt: Date.now() 
+      };
+      
       set((s) => {
-        const msgs = (s.messagesByThread[threadId] || []).concat(asstMsg);
+        const msgs = (s.messagesByThread[threadId] || []).concat(assistantMsg);
         const threads = s.threads.map((t) =>
-          t.id === threadId ? { ...t, lastMessagePreview: assistantText, updatedAt: Date.now() } : t
+          t.id === threadId ? { ...t, lastMessagePreview: response.response, updatedAt: Date.now() } : t
         );
         return { messagesByThread: { ...s.messagesByThread, [threadId]: msgs }, threads };
       });
+      
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      
+      let errorMessage = 'Failed to send message. Please try again.';
+      if (error instanceof BackendAPIError) {
+        if (error.status === 0) {
+          errorMessage = 'Cannot connect to server. Please check if the backend is running.';
+        } else {
+          errorMessage = error.detail || error.message;
+        }
+      }
+      
+      // Add error message
+      const errorMsg: Message = {
+        id: nanoid(),
+        role: "assistant",
+        content: `Sorry, I encountered an error: ${errorMessage}`,
+        createdAt: Date.now()
+      };
+      
+      set((s) => {
+        const msgs = (s.messagesByThread[threadId] || []).concat(errorMsg);
+        return { 
+          messagesByThread: { ...s.messagesByThread, [threadId]: msgs },
+          error: errorMessage
+        };
+      });
+    } finally {
+      set({ isLoading: false });
       ui.setTyping(false);
-    }, 700);
-
-    return () => clearTimeout(reply);
+    }
   },
 
   togglePin: (threadId, messageId) => {
@@ -95,4 +148,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
     ui.setReflecting(true);
     setTimeout(() => ui.setReflecting(false), 1200);
   },
+
+  clearError: () => set({ error: null }),
 }));
