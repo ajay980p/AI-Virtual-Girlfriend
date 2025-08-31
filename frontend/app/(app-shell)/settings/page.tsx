@@ -71,7 +71,7 @@ function Toggle({ label, description, enabled, onChange }: ToggleProps) {
       </div>
       <button
         onClick={() => onChange(!enabled)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
           enabled ? 'bg-primary' : 'bg-gray-600'
         }`}
       >
@@ -107,7 +107,7 @@ export default function SettingsPage() {
           {/* Your Name */}
           <div className="space-y-3">
             <h3 className="text-foreground font-medium">Your Name</h3>
-            <p className="text-muted-foreground text-sm">How should Aria call you?</p>
+            {/* <p className="text-muted-foreground text-sm">How should Aria call you?</p> */}
             <input
               type="text"
               value={yourName}
@@ -174,12 +174,6 @@ export default function SettingsPage() {
             onChange={setVoiceMessages}
           />
           
-          <Toggle
-            label="Dark Mode"
-            description="Toggle between light and dark theme"
-            enabled={darkMode}
-            onChange={setDarkMode}
-          />
         </div>
       </div>
       
@@ -188,10 +182,10 @@ export default function SettingsPage() {
         <h2 className="text-xl font-semibold text-foreground">Memory & Privacy</h2>
         
         <div className="flex gap-4">
-          <button className="px-6 py-3 bg-secondary text-foreground rounded-lg border border-border hover:bg-muted transition-colors">
+          <button className="px-6 py-3 bg-secondary text-foreground rounded-lg border border-border hover:bg-muted transition-colors cursor-pointer">
             Export Chat History
           </button>
-          <button className="px-6 py-3 bg-secondary text-foreground rounded-lg border border-border hover:bg-muted transition-colors">
+          <button className="px-6 py-3 bg-secondary text-foreground rounded-lg border border-border hover:bg-muted transition-colors cursor-pointer">
             Clear All Memories
           </button>
         </div>
@@ -201,7 +195,7 @@ export default function SettingsPage() {
           <p className="text-muted-foreground text-sm leading-relaxed">
             Your conversations are stored securely and used only to enhance your experience with Aria. You can delete your data at any time.
           </p>
-          <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors cursor-pointer">
             Delete All Data
           </button>
         </div>

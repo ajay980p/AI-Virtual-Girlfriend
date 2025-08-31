@@ -24,14 +24,14 @@ export default function DashboardPage() {
         <div className="flex gap-4">
           <a 
             href="/chat" 
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors cursor-pointer"
           >
             💬 Start new chat →
           </a>
-          <button className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors">
+          <button className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors cursor-pointer">
             📅 Daily check-in
           </button>
-          <button className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors">
+          <button className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors cursor-pointer">
             📄 Share a memory
           </button>
         </div>
@@ -86,10 +86,10 @@ export default function DashboardPage() {
                   <span className="text-sm text-muted-foreground">More playful</span>
                   <span className="text-sm text-muted-foreground">More practical</span>
                 </div>
-                <div className="relative">
+                <div className="relative cursor-pointer">
                   <div className="w-full h-2 bg-muted rounded-full"></div>
                   <div className="absolute top-0 left-0 h-2 bg-primary rounded-full" style={{ width: '75%' }}></div>
-                  <div className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-white" style={{ left: '75%', marginLeft: '-8px' }}></div>
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-white cursor-pointer" style={{ left: '75%', marginLeft: '-8px' }}></div>
                 </div>
               </div>
               
@@ -99,10 +99,10 @@ export default function DashboardPage() {
                   <span className="text-sm text-muted-foreground">Emotional</span>
                   <span className="text-sm text-muted-foreground">Logical</span>
                 </div>
-                <div className="relative">
+                <div className="relative cursor-pointer">
                   <div className="w-full h-2 bg-muted rounded-full"></div>
                   <div className="absolute top-0 left-0 h-2 bg-primary rounded-full" style={{ width: '60%' }}></div>
-                  <div className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-white" style={{ left: '60%', marginLeft: '-8px' }}></div>
+                  <div className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary rounded-full border-2 border-white cursor-pointer" style={{ left: '60%', marginLeft: '-8px' }}></div>
                 </div>
               </div>
             </div>
@@ -114,22 +114,22 @@ export default function DashboardPage() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-foreground">Recent conversations</h2>
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:bg-secondary/50 transition-colors">
+          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:bg-secondary/50 transition-colors cursor-pointer">
             <div>
               <h3 className="font-medium text-foreground mb-1">Planning our weekend stargazing trip</h3>
               <p className="text-sm text-muted-foreground">Let's find the perfect spot away from city lights...</p>
             </div>
-            <button className="px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors">
+            <button className="px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors cursor-pointer">
               Continue
             </button>
           </div>
           
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:bg-secondary/50 transition-colors">
+          <div className="flex items-center justify-between p-4 bg-card rounded-lg border border-border hover:bg-secondary/50 transition-colors cursor-pointer">
             <div>
               <h3 className="font-medium text-foreground mb-1">Coffee recommendations</h3>
               <p className="text-sm text-muted-foreground">You asked about the best local coffee shops...</p>
             </div>
-            <button className="px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors">
+            <button className="px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors cursor-pointer">
               Continue
             </button>
           </div>

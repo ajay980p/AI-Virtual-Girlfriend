@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Send, Smile } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Send, Smile, Mic } from "lucide-react";
 
 interface Message {
   id: string;
@@ -9,6 +9,13 @@ interface Message {
   sender: 'user' | 'aria';
   timestamp: Date;
 }
+
+const EMOJIS = [
+  '😊', '😂', '😍', '😘', '😉', '😎', '🤔', '🙄',
+  '😮', '😢', '😭', '😱', '😡', '😌', '😴', '😷',
+  '👍', '👎', '👌', '✌️', '👊', '❤️', '💔', '👏',
+  '🚀', '✨', '🎉', '🎆', '🌈', '🌸', '🌺', '🎁'
+];
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
@@ -20,6 +27,22 @@ export default function ChatPage() {
     }
   ]);
   const [newMessage, setNewMessage] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const sendMessage = () => {
     if (!newMessage.trim()) return;
@@ -51,6 +74,11 @@ export default function ChatPage() {
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  const addEmoji = (emoji: string) => {
+    setNewMessage(prev => prev + emoji);
+    setShowEmojiPicker(false);
   };
 
   return (
@@ -89,11 +117,33 @@ export default function ChatPage() {
       
       {/* Message Input Area */}
       <div className="border-t border-border p-6">
-        <div className="flex items-end gap-3">
+        <div className="flex items-center gap-3 relative">
           {/* Emoji button */}
-          <button className="p-3 text-muted-foreground hover:text-foreground transition-colors">
-            <Smile className="h-5 w-5" />
-          </button>
+          <div className="relative" ref={emojiPickerRef}>
+            <button 
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="p-3 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              <Smile className="h-5 w-5" />
+            </button>
+            
+            {/* Emoji Picker */}
+            {showEmojiPicker && (
+              <div className="absolute bottom-full left-0 mb-2 bg-card border border-border rounded-lg p-4 shadow-lg z-10 w-80">
+                <div className="grid grid-cols-8 gap-2 max-h-48 overflow-y-auto">
+                  {EMOJIS.map((emoji, index) => (
+                    <button
+                      key={index}
+                      onClick={() => addEmoji(emoji)}
+                      className="p-2 text-lg hover:bg-secondary rounded cursor-pointer transition-colors"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           
           {/* Message input */}
           <div className="flex-1 relative">
@@ -107,11 +157,25 @@ export default function ChatPage() {
             />
           </div>
           
+          {/* Mic button - disabled with tooltip */}
+          <div className="relative group">
+            <button
+              disabled
+              className="p-3 text-muted-foreground cursor-not-allowed opacity-50 transition-colors"
+              title="Coming Soon"
+            >
+              <Mic className="h-5 w-5" />
+            </button>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Coming Soon
+            </div>
+          </div>
+          
           {/* Send button */}
           <button
             onClick={sendMessage}
             disabled={!newMessage.trim()}
-            className={`p-3 rounded-xl transition-all duration-200 ${
+            className={`p-3 rounded-xl transition-all duration-200 cursor-pointer ${
               newMessage.trim()
                 ? 'bg-primary text-white hover:bg-primary/90 hover:scale-105'
                 : 'bg-muted text-muted-foreground cursor-not-allowed'

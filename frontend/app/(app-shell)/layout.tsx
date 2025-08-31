@@ -25,19 +25,20 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     setLightMode(!lightMode);
   };
 
-  const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; icon: any }) => {
+  const NavItem = ({ href, label, icon: Icon, collapsed = false }: { href: string; label: string; icon: any; collapsed?: boolean }) => {
     const active = pathname === href;
     return (
       <Link
         href={href}
-        className={`group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
+        className={`group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 cursor-pointer ${
           active 
             ? "bg-primary text-white" 
             : "text-gray-400 hover:text-white hover:bg-gray-800"
-        }`}
+        } ${collapsed ? 'justify-center' : ''}`}
+        title={collapsed ? label : undefined}
       >
-        <Icon className="h-5 w-5" /> 
-        <span>{label}</span>
+        <Icon className="h-5 w-5 flex-shrink-0" /> 
+        {!collapsed && <span>{label}</span>}
       </Link>
     );
   };
@@ -45,59 +46,69 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 bg-background border-r border-border flex flex-col overflow-hidden`}>
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-16'} transition-all duration-300 bg-background border-r border-border flex flex-col overflow-hidden`}>
         {/* Sidebar Header - Fixed */}
         <div className="p-6 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <Brain className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <div className="text-foreground font-semibold">Aria</div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  Aria is online
+            {sidebarOpen ? (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <div className="text-foreground font-semibold">Aria</div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    Aria is online
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center mx-auto">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+            )}
             
-            {/* Close sidebar button */}
-            <button 
-              onClick={() => setSidebarOpen(false)}
-              className="p-1 rounded hover:bg-secondary transition-colors lg:hidden"
-            >
-              <X className="h-5 w-5 text-muted-foreground" />
-            </button>
+            {/* Close sidebar button - only on mobile */}
+            {sidebarOpen && (
+              <button 
+                onClick={() => setSidebarOpen(false)}
+                className="p-1 rounded hover:bg-secondary transition-colors lg:hidden cursor-pointer"
+              >
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            )}
           </div>
         </div>
         
         {/* Scrollable Navigation Area */}
         <div className="flex-1 overflow-y-auto">
-          <nav className="p-6 space-y-2">
-            <NavItem href="/dashboard" label="Dashboard" icon={Home} />
-            <NavItem href="/chat" label="Chat" icon={MessageSquare} />
-            <NavItem href="/settings" label="Settings" icon={Cog} />
+          <nav className={`${sidebarOpen ? 'p-6' : 'p-3'} space-y-2`}>
+            <NavItem href="/dashboard" label="Dashboard" icon={Home} collapsed={!sidebarOpen} />
+            <NavItem href="/chat" label="Chat" icon={MessageSquare} collapsed={!sidebarOpen} />
+            <NavItem href="/settings" label="Settings" icon={Cog} collapsed={!sidebarOpen} />
           </nav>
         </div>
         
         {/* Fixed Bottom Section - Today I remember */}
-        <div className="p-6 border-t border-border flex-shrink-0">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-xs text-white">♥️</span>
+        {sidebarOpen && (
+          <div className="p-6 border-t border-border flex-shrink-0">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <span className="text-xs text-white">♥️</span>
+                </div>
+                <span className="text-foreground font-medium">Today I remember...</span>
               </div>
-              <span className="text-foreground font-medium">Today I remember...</span>
+              <p className="text-muted-foreground text-sm">
+                You love stargazing and coffee ☕
+              </p>
+              <button className="text-primary text-sm hover:text-primary/80 transition-colors cursor-pointer">
+                Add something to remember
+              </button>
             </div>
-            <p className="text-muted-foreground text-sm">
-              You love stargazing and coffee ☕
-            </p>
-            <button className="text-primary text-sm hover:text-primary/80 transition-colors">
-              Add something to remember
-            </button>
           </div>
-        </div>
+        )}
       </aside>
 
       {/* Main Content Area */}
@@ -109,7 +120,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
               {/* Sidebar toggle button */}
               <button 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded hover:bg-secondary transition-colors"
+                className="p-2 rounded hover:bg-secondary transition-colors cursor-pointer"
               >
                 <Menu className="h-5 w-5 text-muted-foreground" />
               </button>
@@ -142,7 +153,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
             {/* Dark/Light mode toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              className="p-2 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
               title={lightMode ? 'Switch to dark mode' : 'Switch to light mode'}
             >
               {lightMode ? (
