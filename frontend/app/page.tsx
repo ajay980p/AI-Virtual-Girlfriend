@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import AvatarLanding from "@/components/landing/AvatarLanding";
 
-export default function Page() {
-  redirect("/dashboard");
+export default function HomePage() {
+  return <AvatarLanding />;
 }
