@@ -64,7 +64,7 @@ export default function ChatPage() {
                 <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-xs text-white">♥️</span>
                 </div>
-                <span className="text-gray-400 text-sm">Aria</span>
+                <span className="text-muted-foreground text-sm">Aria</span>
               </div>
             )}
             
@@ -72,14 +72,14 @@ export default function ChatPage() {
               <div className={`max-w-sm lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl ${
                 message.sender === 'user' 
                   ? 'bg-primary text-white' 
-                  : 'bg-gray-800 text-white'
+                  : 'bg-card text-card-foreground'
               }`}>
                 <p className="text-sm leading-relaxed">{message.text}</p>
               </div>
             </div>
             
             <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
@@ -88,10 +88,10 @@ export default function ChatPage() {
       </div>
       
       {/* Message Input Area */}
-      <div className="border-t border-gray-800 p-6">
+      <div className="border-t border-border p-6">
         <div className="flex items-end gap-3">
           {/* Emoji button */}
-          <button className="p-3 text-gray-400 hover:text-white transition-colors">
+          <button className="p-3 text-muted-foreground hover:text-foreground transition-colors">
             <Smile className="h-5 w-5" />
           </button>
           
@@ -102,7 +102,7 @@ export default function ChatPage() {
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Share your thoughts with Aria..."
-              className="w-full bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3 pr-12 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none min-h-[50px] max-h-32"
+              className="w-full bg-input border border-border rounded-2xl px-4 py-3 pr-12 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none min-h-[50px] max-h-32"
               rows={1}
             />
           </div>
@@ -114,7 +114,7 @@ export default function ChatPage() {
             className={`p-3 rounded-xl transition-all duration-200 ${
               newMessage.trim()
                 ? 'bg-primary text-white hover:bg-primary/90 hover:scale-105'
-                : 'bg-gray-800 text-gray-400 cursor-not-allowed'
+                : 'bg-muted text-muted-foreground cursor-not-allowed'
             }`}
           >
             <Send className="h-5 w-5" />

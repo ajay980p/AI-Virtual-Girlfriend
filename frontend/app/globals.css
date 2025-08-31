@@ -48,7 +48,7 @@
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
-/* Dark theme as default to match the reference design */
+/* Dark theme as default - matching the original design */
 :root {
   /* Dark theme colors - matching the reference design */
   --background: #0a0a0a;
@@ -71,26 +71,31 @@
   --input: #1a1a1a;
   --ring: #8b5cf6;
   --radius: 0.75rem;
-  
-  /* Purple-focused gradients matching the reference */
-  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
-  --gradient-secondary: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%);
-  --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%);
-  --gradient-bg: linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #0f0f0f 100%);
-  --gradient-surface: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(42, 42, 42, 0.8) 100%);
-  
-  /* Dark glass effects */
-  --glass-bg: rgba(26, 26, 26, 0.6);
-  --glass-bg-strong: rgba(26, 26, 26, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-  
-  /* Dark surfaces */
-  --surface-1: rgba(26, 26, 26, 0.7);
-  --surface-2: rgba(26, 26, 26, 0.9);
-  --surface-3: rgba(26, 26, 26, 1);
-  --glow-primary: 0 0 40px rgba(139, 92, 246, 0.3);
-  --glow-secondary: 0 0 20px rgba(124, 58, 237, 0.2);
+}
+
+/* Light theme - applied when .light class is present */
+.light {
+  /* Light theme colors */
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #f8f9fa;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #1e293b;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --accent: #e0e7ff;
+  --accent-foreground: #3730a3;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --ring: #8b5cf6;
+  --radius: 0.75rem;
 }
 
 /* Custom utility classes */

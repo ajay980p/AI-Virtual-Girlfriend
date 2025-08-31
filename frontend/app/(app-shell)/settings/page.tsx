@@ -13,15 +13,15 @@ interface SliderProps {
 function Slider({ label, leftLabel, rightLabel, value, onChange }: SliderProps) {
   return (
     <div className="space-y-3">
-      <h3 className="text-white font-medium">{label}</h3>
-      <p className="text-gray-400 text-sm">How {label.toLowerCase()} Aria is</p>
+      <h3 className="text-foreground font-medium">{label}</h3>
+      <p className="text-muted-foreground text-sm">How {label.toLowerCase()} Aria is</p>
       <div>
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-gray-400">{leftLabel}</span>
-          <span className="text-sm text-gray-400">{rightLabel}</span>
+          <span className="text-sm text-muted-foreground">{leftLabel}</span>
+          <span className="text-sm text-muted-foreground">{rightLabel}</span>
         </div>
         <div className="relative">
-          <div className="w-full h-2 bg-gray-700 rounded-full"></div>
+          <div className="w-full h-2 bg-muted rounded-full"></div>
           <div 
             className="absolute top-0 left-0 h-2 bg-primary rounded-full" 
             style={{ width: `${value}%` }}
@@ -65,8 +65,8 @@ function Toggle({ label, description, enabled, onChange }: ToggleProps) {
           {label === "Notifications" ? "🔔" : label === "Voice Messages" ? "🎤" : "🌙"}
         </span>
         <div>
-          <h3 className="text-white font-medium">{label}</h3>
-          <p className="text-gray-400 text-sm">{description}</p>
+          <h3 className="text-foreground font-medium">{label}</h3>
+          <p className="text-muted-foreground text-sm">{description}</p>
         </div>
       </div>
       <button
@@ -100,30 +100,30 @@ export default function SettingsPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <span className="text-purple-500">💜</span>
-          <h2 className="text-xl font-semibold text-white">Personal Preferences</h2>
+          <h2 className="text-xl font-semibold text-foreground">Personal Preferences</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Your Name */}
           <div className="space-y-3">
-            <h3 className="text-white font-medium">Your Name</h3>
-            <p className="text-gray-400 text-sm">How should Aria call you?</p>
+            <h3 className="text-foreground font-medium">Your Name</h3>
+            <p className="text-muted-foreground text-sm">How should Aria call you?</p>
             <input
               type="text"
               value={yourName}
               onChange={(e) => setYourName(e.target.value)}
               placeholder="Enter your name"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full bg-input border border-border rounded-lg px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
           
           {/* Relationship Style */}
           <div className="space-y-3">
-            <h3 className="text-white font-medium">Relationship Style</h3>
+            <h3 className="text-foreground font-medium">Relationship Style</h3>
             <select
               value={relationshipStyle}
               onChange={(e) => setRelationshipStyle(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full bg-input border border-border rounded-lg px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="Romantic Partner">Romantic Partner</option>
               <option value="Best Friend">Best Friend</option>
@@ -156,7 +156,7 @@ export default function SettingsPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <span className="text-purple-500">⚙️</span>
-          <h2 className="text-xl font-semibold text-white">App Settings</h2>
+          <h2 className="text-xl font-semibold text-foreground">App Settings</h2>
         </div>
         
         <div className="space-y-6">
@@ -185,20 +185,20 @@ export default function SettingsPage() {
       
       {/* Memory & Privacy Section */}
       <div className="space-y-6">
-        <h2 className="text-xl font-semibold text-white">Memory & Privacy</h2>
+        <h2 className="text-xl font-semibold text-foreground">Memory & Privacy</h2>
         
         <div className="flex gap-4">
-          <button className="px-6 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 hover:bg-gray-700 transition-colors">
+          <button className="px-6 py-3 bg-secondary text-foreground rounded-lg border border-border hover:bg-muted transition-colors">
             Export Chat History
           </button>
-          <button className="px-6 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 hover:bg-gray-700 transition-colors">
+          <button className="px-6 py-3 bg-secondary text-foreground rounded-lg border border-border hover:bg-muted transition-colors">
             Clear All Memories
           </button>
         </div>
         
         <div className="space-y-4">
-          <h3 className="text-white font-medium">Data Retention</h3>
-          <p className="text-gray-400 text-sm leading-relaxed">
+          <h3 className="text-foreground font-medium">Data Retention</h3>
+          <p className="text-muted-foreground text-sm leading-relaxed">
             Your conversations are stored securely and used only to enhance your experience with Aria. You can delete your data at any time.
           </p>
           <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">

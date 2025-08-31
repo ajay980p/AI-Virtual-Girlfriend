@@ -2,12 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Home, MessageSquare, Cog, Brain } from "lucide-react";
-import { useState } from "react";
+import { Menu, Home, MessageSquare, Cog, Brain, X, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function AppShellLayout({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [lightMode, setLightMode] = useState(false); // Dark mode is default
   const pathname = usePathname();
+
+  // Apply light mode class to document (dark is default)
+  useEffect(() => {
+    if (lightMode) {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.remove('light');
+      document.documentElement.classList.add('dark');
+    }
+  }, [lightMode]);
+
+  const toggleTheme = () => {
+    setLightMode(!lightMode);
+  };
 
   const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; icon: any }) => {
     const active = pathname === href;
@@ -28,58 +44,74 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar - matching reference design exactly */}
-      <aside className={`w-64 bg-background border-r border-gray-800 p-6 flex flex-col ${open ? "block" : "hidden md:block"}`}>
-        {/* Aria Profile */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-            <Brain className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <div className="text-white font-semibold">Aria</div>
-            <div className="flex items-center gap-1 text-xs text-gray-400">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              Aria is online
+      {/* Sidebar */}
+      <aside className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 bg-background border-r border-border flex flex-col overflow-hidden`}>
+        {/* Sidebar Header - Fixed */}
+        <div className="p-6 border-b border-border flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-foreground font-semibold">Aria</div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  Aria is online
+                </div>
+              </div>
             </div>
+            
+            {/* Close sidebar button */}
+            <button 
+              onClick={() => setSidebarOpen(false)}
+              className="p-1 rounded hover:bg-secondary transition-colors lg:hidden"
+            >
+              <X className="h-5 w-5 text-muted-foreground" />
+            </button>
           </div>
         </div>
         
-        {/* Navigation */}
-        <nav className="space-y-2 mb-8">
-          <NavItem href="/dashboard" label="Dashboard" icon={Home} />
-          <NavItem href="/chat" label="Chat" icon={MessageSquare} />
-          <NavItem href="/settings" label="Settings" icon={Cog} />
-        </nav>
+        {/* Scrollable Navigation Area */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-6 space-y-2">
+            <NavItem href="/dashboard" label="Dashboard" icon={Home} />
+            <NavItem href="/chat" label="Chat" icon={MessageSquare} />
+            <NavItem href="/settings" label="Settings" icon={Cog} />
+          </nav>
+        </div>
         
-        {/* Today I remember section - matching reference */}
-        <div className="mt-auto">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-xs text-white">♥️</span>
+        {/* Fixed Bottom Section - Today I remember */}
+        <div className="p-6 border-t border-border flex-shrink-0">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-xs text-white">♥️</span>
+              </div>
+              <span className="text-foreground font-medium">Today I remember...</span>
             </div>
-            <span className="text-white font-medium">Today I remember...</span>
+            <p className="text-muted-foreground text-sm">
+              You love stargazing and coffee ☕
+            </p>
+            <button className="text-primary text-sm hover:text-primary/80 transition-colors">
+              Add something to remember
+            </button>
           </div>
-          <p className="text-gray-400 text-sm mb-3">
-            You love stargazing and coffee ☕
-          </p>
-          <button className="text-primary text-sm hover:text-primary/80 transition-colors">
-            Add something to remember
-          </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header - matching reference design */}
-        <header className="bg-background border-b border-gray-800 px-8 py-4">
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="bg-background border-b border-border px-8 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {/* Mobile menu button */}
+              {/* Sidebar toggle button */}
               <button 
-                className="md:hidden p-2 rounded hover:bg-gray-800 transition-colors" 
-                onClick={() => setOpen(true)}
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="p-2 rounded hover:bg-secondary transition-colors"
               >
-                <Menu className="h-5 w-5 text-gray-400" />
+                <Menu className="h-5 w-5 text-muted-foreground" />
               </button>
               
               {/* Chat header for chat page */}
@@ -89,8 +121,8 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
                     <Brain className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-white font-semibold">Aria</div>
-                    <div className="flex items-center gap-1 text-xs text-gray-400">
+                    <div className="text-foreground font-semibold">Aria</div>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       Online • Thinking of you
                     </div>
@@ -101,11 +133,24 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
               {/* Settings header for settings page */}
               {pathname.startsWith("/settings") && (
                 <div>
-                  <h1 className="text-white text-2xl font-bold">Settings</h1>
-                  <p className="text-gray-400">Customize your experience with Aria</p>
+                  <h1 className="text-foreground text-2xl font-bold">Settings</h1>
+                  <p className="text-muted-foreground">Customize your experience with Aria</p>
                 </div>
               )}
             </div>
+            
+            {/* Dark/Light mode toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+              title={lightMode ? 'Switch to dark mode' : 'Switch to light mode'}
+            >
+              {lightMode ? (
+                <Moon className="h-5 w-5 text-muted-foreground" />
+              ) : (
+                <Sun className="h-5 w-5 text-yellow-500" />
+              )}
+            </button>
           </div>
         </header>
 
@@ -114,6 +159,14 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
           {children}
         </main>
       </div>
+      
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
