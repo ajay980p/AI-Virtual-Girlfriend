@@ -15,22 +15,22 @@ export default function AvatarCard({ avatar, index, onSelect }: AvatarCardProps)
 
   return (
     <div 
-      className="group relative cursor-pointer"
+      className="group relative cursor-pointer w-full max-w-sm mx-auto"
       style={{ 
         animationDelay: `${index * 100}ms` 
       }}
       onClick={() => onSelect(avatar)}
     >
       {/* Main Card */}
-      <div className="glass-strong rounded-2xl overflow-hidden border border-border/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 hover:-translate-y-1 animate-fade-in">
+      <div className="relative bg-card/80 backdrop-blur-xl rounded-3xl overflow-hidden border border-border/50 shadow-2xl transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 hover:border-primary/40 hover:-translate-y-2 hover:bg-card/90 animate-fade-in">
         {/* Avatar Image */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-muted/50 to-muted/30">
+        <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-muted/30 to-muted/60">
           {!imageError ? (
             <>
               {/* Placeholder while loading */}
               {!imageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
-                  <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+                  <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center animate-pulse border border-white/20">
                     <span className="text-2xl">👤</span>
                   </div>
                 </div>
@@ -49,44 +49,44 @@ export default function AvatarCard({ avatar, index, onSelect }: AvatarCardProps)
             </>
           ) : (
             /* Fallback when image fails to load */
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
               <div className="text-center">
-                <div className="w-20 h-20 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-3">
+                <div className="w-20 h-20 mx-auto rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3 border border-white/20">
                   <span className="text-3xl">
                     {avatar.category === 'anime' ? '🎨' : '👤'}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground">Image Preview</p>
+                <p className="text-xs text-white/70">Image Preview</p>
               </div>
             </div>
           )}
           
           {/* Hover Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
           {/* Category Badge */}
-          <div className="absolute top-3 right-3">
-            <span className="px-2 py-1 text-xs font-medium bg-black/30 text-white rounded-full backdrop-blur-sm">
+          <div className="absolute top-4 right-4">
+            <span className="px-3 py-1.5 text-xs font-semibold bg-black/50 text-white rounded-full backdrop-blur-md border border-white/20">
               {avatar.category === 'anime' ? '🎨 Anime' : '📸 Realistic'}
             </span>
           </div>
           
           {/* Hover Action */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-            <button className="px-6 py-2 bg-primary text-white rounded-xl font-medium shadow-lg hover:bg-primary/90 transition-colors">
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+            <button className="px-8 py-3 bg-primary/90 backdrop-blur-sm text-white rounded-2xl font-semibold shadow-xl hover:bg-primary transition-colors border border-primary/30">
               Chat Now →
             </button>
           </div>
         </div>
 
         {/* Card Content */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 bg-card/20 backdrop-blur-sm">
           {/* Name and Age */}
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
               {avatar.name}
             </h3>
-            <span className="text-sm font-medium text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+            <span className="text-sm font-semibold text-muted-foreground bg-muted/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border/30">
               {avatar.age} years
             </span>
           </div>
@@ -101,31 +101,31 @@ export default function AvatarCard({ avatar, index, onSelect }: AvatarCardProps)
             {avatar.personality.slice(0, 3).map((trait) => (
               <span 
                 key={trait}
-                className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-md border border-primary/20"
+                className="px-3 py-1.5 text-xs font-semibold bg-primary/20 text-primary rounded-lg border border-primary/30 backdrop-blur-sm"
               >
                 {trait}
               </span>
             ))}
             {avatar.personality.length > 3 && (
-              <span className="px-2 py-1 text-xs font-medium text-muted-foreground">
+              <span className="px-3 py-1.5 text-xs font-medium text-muted-foreground bg-muted/30 backdrop-blur-sm rounded-lg border border-border/30">
                 +{avatar.personality.length - 3} more
               </span>
             )}
           </div>
           
           {/* Interest Tags */}
-          <div className="pt-2 border-t border-border/20">
-            <div className="flex flex-wrap gap-1">
+          <div className="pt-2 border-t border-border/30">
+            <div className="flex flex-wrap gap-2">
               {avatar.tags.slice(0, 2).map((tag) => (
                 <span 
                   key={tag}
-                  className="px-2 py-1 text-xs text-muted-foreground bg-muted/30 rounded-md"
+                  className="px-2 py-1 text-xs text-muted-foreground bg-muted/40 backdrop-blur-sm rounded-md border border-border/20"
                 >
                   {tag}
                 </span>
               ))}
               {avatar.tags.length > 2 && (
-                <span className="px-2 py-1 text-xs text-muted-foreground">
+                <span className="px-2 py-1 text-xs text-muted-foreground bg-muted/30 backdrop-blur-sm rounded-md border border-border/20">
                   +{avatar.tags.length - 2}
                 </span>
               )}
@@ -134,8 +134,8 @@ export default function AvatarCard({ avatar, index, onSelect }: AvatarCardProps)
         </div>
       </div>
       
-      {/* Glow Effect on Hover */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-sm" />
+      {/* Enhanced Glow Effect on Hover */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-accent/30 to-primary/30 rounded-3xl opacity-0 group-hover:opacity-100 transition-all duration-500 -z-10 blur-lg group-hover:blur-xl" />
     </div>
   );
 }

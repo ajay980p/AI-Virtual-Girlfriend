@@ -1,6 +1,16 @@
 "use client";
 
+import { useState } from "react";
+import AuthModal from "@/components/auth/AuthModal";
+
 export default function HeroSection() {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
+
+  const openAuthModal = (mode: "signin" | "signup") => {
+    setAuthMode(mode);
+    setIsAuthModalOpen(true);
+  };
   return (
     <section className="relative py-20 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
@@ -21,10 +31,16 @@ export default function HeroSection() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium bg-primary text-white rounded-xl hover:bg-primary/90 transition-all duration-200 transform hover:scale-105 cursor-pointer">
+              <button 
+                onClick={() => openAuthModal("signup")}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium bg-primary text-white rounded-xl hover:bg-primary/90 transition-all duration-200 transform hover:scale-105 cursor-pointer"
+              >
                 ✨ Create For Free
               </button>
-              <button className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium border border-border text-muted-foreground rounded-xl hover:bg-secondary transition-all duration-200 cursor-pointer">
+              <button 
+                onClick={() => openAuthModal("signin")}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium border border-border text-muted-foreground rounded-xl hover:bg-secondary transition-all duration-200 cursor-pointer"
+              >
                 🎮 Explore Gallery
               </button>
             </div>
@@ -88,6 +104,13 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode={authMode}
+      />
     </section>
   );
 }

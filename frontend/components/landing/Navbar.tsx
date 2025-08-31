@@ -1,9 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import AuthModal from "@/components/auth/AuthModal";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+
+  const openAuthModal = (mode: "signin" | "signup") => {
+    setAuthMode(mode);
+    setIsAuthModalOpen(true);
+    setIsMenuOpen(false); // Close mobile menu if open
+  };
 
   return (
     <nav className="relative z-50 border-b border-border/20 bg-background/80 backdrop-blur-sm">
@@ -34,10 +43,16 @@ export default function Navbar() {
             
             {/* Action Buttons */}
             <div className="flex items-center gap-3 ml-6">
-              <button className="px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors cursor-pointer">
+              <button 
+                onClick={() => openAuthModal("signin")}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors cursor-pointer"
+              >
                 Sign In
               </button>
-              <button className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors cursor-pointer">
+              <button 
+                onClick={() => openAuthModal("signup")}
+                className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+              >
                 Create Account
               </button>
             </div>
@@ -74,16 +89,29 @@ export default function Navbar() {
               🆘 Support
             </a>
             <div className="pt-4 border-t border-border/20 space-y-3">
-              <button className="w-full px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors cursor-pointer">
+              <button 
+                onClick={() => openAuthModal("signin")}
+                className="w-full px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors cursor-pointer"
+              >
                 Sign In
               </button>
-              <button className="w-full px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors cursor-pointer">
+              <button 
+                onClick={() => openAuthModal("signup")}
+                className="w-full px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
+              >
                 Create Account
               </button>
             </div>
           </div>
         )}
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode={authMode}
+      />
     </nav>
   );
 }

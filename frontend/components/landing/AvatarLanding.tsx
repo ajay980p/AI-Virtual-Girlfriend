@@ -7,10 +7,12 @@ import AvatarCard from "@/components/landing/AvatarCard";
 import CategoryFilter from "@/components/landing/CategoryFilter";
 import HeroSection from "@/components/landing/HeroSection";
 import Navbar from "@/components/landing/Navbar";
+import AuthModal from "@/components/auth/AuthModal";
 
 export default function AvatarLanding() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'realistic' | 'anime'>('all');
   const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const router = useRouter();
 
   // Filter avatars based on selected category
@@ -20,8 +22,13 @@ export default function AvatarLanding() {
 
   const handleAvatarSelect = (avatar: Avatar) => {
     setSelectedAvatar(avatar);
-    // Redirect to authentication with avatar context
-    router.push(`/auth/signin?avatar=${avatar.id}&name=${encodeURIComponent(avatar.name)}`);
+    setIsAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthModalOpen(false);
+    // Redirect to dashboard after successful auth
+    router.push("/dashboard");
   };
 
   const handleCategoryChange = (category: 'all' | 'realistic' | 'anime') => {
@@ -54,7 +61,7 @@ export default function AvatarLanding() {
           />
 
           {/* Avatar Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-12 place-items-center">
             {filteredAvatars.map((avatar, index) => (
               <AvatarCard
                 key={avatar.id}
@@ -94,6 +101,13 @@ export default function AvatarLanding() {
           </div>
         </footer>
       </div>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        selectedAvatar={selectedAvatar ? { id: selectedAvatar.id, name: selectedAvatar.name } : null}
+      />
     </div>
   );
 }
