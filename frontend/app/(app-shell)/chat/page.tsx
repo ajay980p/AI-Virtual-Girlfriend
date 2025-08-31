@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Send, Smile, Mic } from "lucide-react";
+import { useChatStore } from "@/store/chat.store";
+import { useUIStore } from "@/store/ui.store";
 
 interface Message {
   id: string;
@@ -18,17 +20,19 @@ const EMOJIS = [
 ];
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: "Hello there! I'm so happy to see you again. How was your day? ✨",
-      sender: 'aria',
-      timestamp: new Date('2024-01-01T22:39:00')
-    }
-  ]);
   const [newMessage, setNewMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
+  
+  // Use the chat store for proper backend integration
+  const activeThreadId = useChatStore((s) => s.activeThreadId);
+  const messages = useChatStore((s) => activeThreadId ? s.messagesByThread[activeThreadId] || [] : []);
+  const sendMessage = useChatStore((s) => s.sendMessage);
+  const isLoading = useChatStore((s) => s.isLoading);
+  const error = useChatStore((s) => s.error);
+  const clearError = useChatStore((s) => s.clearError);
+  const vibe = useUIStore((s) => s.vibe);
+  const typing = useUIStore((s) => s.assistantTyping);
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -44,35 +48,32 @@ export default function ChatPage() {
     };
   }, []);
 
-  const sendMessage = () => {
-    if (!newMessage.trim()) return;
+  const handleSendMessage = async () => {
+    // Validation: Check if message is not empty and activeThreadId exists
+    if (!newMessage.trim() || !activeThreadId || isLoading) {
+      return;
+    }
     
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: newMessage,
-      sender: 'user',
-      timestamp: new Date()
-    };
+    // Clear any previous errors
+    if (error) {
+      clearError();
+    }
     
-    setMessages(prev => [...prev, userMessage]);
-    setNewMessage('');
-    
-    // Simulate Aria's response
-    setTimeout(() => {
-      const ariaMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "That's wonderful to hear! I love our conversations. Tell me more about what's on your mind.",
-        sender: 'aria',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, ariaMessage]);
-    }, 1000);
+    try {
+      // Send message through the chat store (which handles backend integration)
+      await sendMessage(activeThreadId, { content: newMessage, vibe });
+      // Clear the input after successful send
+      setNewMessage('');
+    } catch (err) {
+      console.error('Failed to send message:', err);
+      // Error handling is already managed by the chat store
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSendMessage();
     }
   };
 
@@ -83,11 +84,38 @@ export default function ChatPage() {
 
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col bg-background">
+      {/* Error Message */}
+      {error && (
+        <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+          <div className="flex items-start gap-2">
+            <span className="text-red-500">⚠️</span>
+            <div className="flex-1">
+              <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+              <button
+                onClick={clearError}
+                className="mt-1 text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Connection Status */}
+      {!activeThreadId && (
+        <div className="mx-6 mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20">
+          <p className="text-sm text-yellow-700 dark:text-yellow-300">
+            No active chat thread. Please create a new conversation.
+          </p>
+        </div>
+      )}
+      
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.map((message) => (
           <div key={message.id} className="space-y-2">
-            {message.sender === 'aria' && (
+            {message.role === 'assistant' && (
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                   <span className="text-xs text-white">♥️</span>
@@ -96,23 +124,47 @@ export default function ChatPage() {
               </div>
             )}
             
-            <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-sm lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl ${
-                message.sender === 'user' 
+                message.role === 'user' 
                   ? 'bg-primary text-white' 
                   : 'bg-card text-card-foreground'
               }`}>
-                <p className="text-sm leading-relaxed">{message.text}</p>
+                <p className="text-sm leading-relaxed">{message.content}</p>
               </div>
             </div>
             
-            <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <span className="text-xs text-muted-foreground">
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
           </div>
         ))}
+        
+        {/* Typing Indicator */}
+        {typing && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-xs text-white">♥️</span>
+              </div>
+              <span className="text-muted-foreground text-sm">Aria</span>
+            </div>
+            <div className="flex justify-start">
+              <div className="bg-card text-card-foreground px-4 py-3 rounded-2xl">
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground">Aria is thinking</span>
+                  <div className="flex items-center gap-1 ml-2">
+                    <span className="inline-flex h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+                    <span className="inline-flex h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+                    <span className="inline-flex h-1.5 w-1.5 animate-bounce rounded-full bg-primary" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Message Input Area */}
@@ -173,15 +225,19 @@ export default function ChatPage() {
           
           {/* Send button */}
           <button
-            onClick={sendMessage}
-            disabled={!newMessage.trim()}
+            onClick={handleSendMessage}
+            disabled={!newMessage.trim() || !activeThreadId || isLoading}
             className={`p-3 rounded-xl transition-all duration-200 cursor-pointer ${
-              newMessage.trim()
+              newMessage.trim() && activeThreadId && !isLoading
                 ? 'bg-primary text-white hover:bg-primary/90 hover:scale-105'
                 : 'bg-muted text-muted-foreground cursor-not-allowed'
             }`}
           >
-            <Send className="h-5 w-5" />
+            {isLoading ? (
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              <Send className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>

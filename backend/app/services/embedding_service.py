@@ -1,10 +1,11 @@
 import os
-import logging
 from typing import List
-from dotenv import load_dotenv
 import requests
 import asyncio
 import aiohttp
+import logging
+from dotenv import load_dotenv
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 # Load environment variables from .env file
 load_dotenv()
@@ -12,13 +13,12 @@ load_dotenv()
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# HuggingFace API configuration
-HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
-HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY")  # Optional, for better rate limits
+# --- 1. Initialize the LangChain client ONCE ---
+embeddings_client = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
 
 async def embed_text(text: str) -> List[float]:
     """
-    Generates a vector embedding for the given text using HuggingFace API.
+    Generates a vector embedding for the given text using the LangChain client.
     
     Args:
         text (str): The input text to generate embeddings for.
@@ -33,33 +33,22 @@ async def embed_text(text: str) -> List[float]:
     if not text or not text.strip():
         raise ValueError("Input text cannot be empty.")
 
-    headers = {"Content-Type": "application/json"}
-    if HF_API_KEY:
-        headers["Authorization"] = f"Bearer {HF_API_KEY}"
-    
-    payload = {"inputs": text.strip()}
-    
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(HF_API_URL, json=payload, headers=headers) as response:
-                if response.status != 200:
-                    error_text = await response.text()
-                    raise ConnectionError(f"HuggingFace API error {response.status}: {error_text}")
-                
-                result = await response.json()
-                
-                # HuggingFace returns the embedding directly for feature extraction
-                if isinstance(result, list) and len(result) > 0:
-                    embedding_vector = result[0] if isinstance(result[0], list) else result
-                    logger.info(f"Successfully generated embedding for text of length {len(text)}")
-                    return embedding_vector
-                else:
-                    raise ValueError("Received invalid embedding response from HuggingFace API.")
-                    
-    except aiohttp.ClientError as e:
+        # --- 2. Use the async method from the LangChain client ---
+        embedding_vector = await embeddings_client.aembed_query(text.strip())
+        
+        if not embedding_vector:
+            raise ValueError("Received empty embedding vector from API.")
+            
+        logger.info(f"Successfully generated embedding for text of length {len(text)}")
+        return embedding_vector
+        
+    except ConnectionError as e:
         logger.error(f"Connection error during embedding generation: {e}")
         raise ConnectionError(f"Failed to connect to HuggingFace API: {str(e)}")
     except Exception as e:
+        # LangChain will raise its own specific errors, but a general
+        # catch-all is good for robustness.
         logger.error(f"An error occurred during embedding: {e}")
         raise ValueError(f"Failed to generate embedding: {str(e)}")
 
