@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from typing import Optional
-from pinecone import Pinecone, exceptions
+from pinecone import Pinecone
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -61,6 +61,10 @@ def find_similar_memory_id(user_id: str, vector: list[float], threshold: float =
     return None
 
 
+
+
+
+
 # 2. Find similar memories for chat context (async)
 async def find_similar_memory(user_id: str, vector: list[float], top_k: int = 5) -> list[dict]:
     """Find similar memories for a given user to use as chat context.
@@ -80,6 +84,10 @@ async def find_similar_memory(user_id: str, vector: list[float], top_k: int = 5)
         filter={"user_id": user_id}
     )
     return result.get("matches", [])
+
+
+
+
 
 
 
@@ -117,18 +125,3 @@ def upsert_memory(user_id: str, vector: list[float], text: str, memory_type: str
             }
         )
     ])
-
-
-# Test connection
-if __name__ == "__main__":
-    print("✅ Testing Pinecone connection...")
-    try:
-        stats = index.describe_index_stats()
-        print(f"Index stats: {stats}")
-        print("✅ Pinecone connection test successful!")
-    except exceptions.PineconeApiException as e:
-        print(f"❌ Pinecone API error: {e}")
-    except ValueError as e:
-        print(f"❌ Invalid argument: {e}")
-    except Exception as e:
-        print(f"❌ Unexpected error: {e}")

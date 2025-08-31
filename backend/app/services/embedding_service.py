@@ -54,6 +54,10 @@ async def embed_text(text: str) -> List[float]:
         raise ValueError(f"Failed to generate embedding: {str(e)}")
 
 
+
+
+
+
 async def embed_texts_batch(texts: List[str]) -> List[List[float]]:
     """
     Generates vector embeddings for multiple texts in batch.
@@ -95,6 +99,11 @@ async def embed_texts_batch(texts: List[str]) -> List[List[float]]:
     except Exception as e:
         logger.error(f"An error occurred during batch embedding: {e}")
         raise ValueError(f"Failed to generate batch embeddings: {str(e)}")
+
+
+
+
+
 
 
 def get_embedding_dimension() -> int:

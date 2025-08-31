@@ -33,7 +33,7 @@ async def generate_chat_response(payload):
         context = "\n".join([m['metadata']['text'] for m in retrieved_memories if m.get('metadata', {}).get('text')])
         full_prompt = f"{SYSTEM_PROMPT}\n\n[User's Past Memories]\n{context}\n\n[User Message]\n{payload.message}"
 
-        # Step 4: Call LLM
+        # Step 4: Call LLMs
         response = await call_llm(full_prompt)
         logger.info(f"Generated LLM response for user {payload.user_id}")
         
@@ -77,6 +77,10 @@ async def store_conversation_memory(user_id: str, user_message: str, ai_response
         # Don't fail the whole conversation if memory storage fails
         logger.warning(f"Failed to store conversation memory: {str(e)}")
         print(f"Warning: Failed to store conversation memory: {str(e)}")
+
+
+
+
 
 
 async def store_multiple_memories(user_id: str, memory_texts: list[str], memory_types: list[str] = None):

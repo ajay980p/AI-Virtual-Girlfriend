@@ -9,8 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 
-
-
 @router.post("/respond", response_model=ChatResponse)
 async def respond_to_user(payload: ChatRequest):
     try:
