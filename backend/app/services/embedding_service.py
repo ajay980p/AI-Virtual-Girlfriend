@@ -1,9 +1,9 @@
 import os
 import logging
-from typing import List, Optional
+from typing import List
 from dotenv import load_dotenv
 # Correct import for calling the Hugging Face API endpoint
-from langchain_huggingface import HuggingFaceEndpointEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 # Load environment variables from .env file
 load_dotenv()
@@ -12,10 +12,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # --- 1. Initialize the LangChain client ONCE ---
-embeddings_client = HuggingFaceEndpointEmbeddings(
-    repo_id="sentence-transformers/all-MiniLM-L6-v2",
-    huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN"),
-)
+embeddings_client = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
 
 async def embed_text(text: str) -> List[float]:
     """
