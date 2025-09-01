@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.memory import MemoryRequest
-from app.services.embedding_service import embed_text
-from app.services.pinecone_service import upsert_memory
+from app.services.mock_embedding_service import embed_text
+from app.services.mock_pinecone_service import store_memory as mock_store_memory
 
 router = APIRouter()
 
@@ -18,11 +18,11 @@ async def store_memory(payload: MemoryRequest):
         # 1. Embed the text
         vector = await embed_text(payload.text)
 
-        # 2. Upsert to Pinecone (with dedup + timestamp)
-        upsert_memory(
+        # 2. Store to mock Pinecone service
+        await mock_store_memory(
             user_id=payload.user_id,
-            vector=vector,
             text=payload.text,
+            vector=vector,
             memory_type=payload.memory_type
         )
 

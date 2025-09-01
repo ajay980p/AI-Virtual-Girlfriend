@@ -258,26 +258,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return { messagesByThread: { ...s.messagesByThread, [threadId]: msgs }, threads };
     });
 
-    // Save user message to backend if authenticated
-    if (authState.user?._id) {
-      try {
-        await conversationAPI.addMessage(threadId, {
-          role: 'user',
-          content,
-        });
-      } catch (error) {
-        console.warn('Failed to save user message to backend:', error);
-        // Continue with AI response even if saving fails
-      }
-    }
-
     // Set loading and typing states
     set({ isLoading: true });
     ui.setTyping(true);
 
     try {
-      // Call backend AI API
-      const response = await chatAPI.sendMessage(userId, content);
+      // Get auth token if available
+      const authToken = authState.token;
+      
+      // Call backend AI API with auth token and conversation ID
+      const response = await chatAPI.sendMessage(userId, content, threadId, authToken);
       
       // Add assistant response
       const assistantMsg: Message = { 
@@ -295,17 +285,27 @@ export const useChatStore = create<ChatState>((set, get) => ({
         return { messagesByThread: { ...s.messagesByThread, [threadId]: msgs }, threads };
       });
       
-      // Save assistant message to backend if authenticated
-      if (authState.user?._id) {
-        try {
-          await conversationAPI.addMessage(threadId, {
-            role: 'assistant',
-            content: response.response,
-          });
-        } catch (error) {
-          console.warn('Failed to save assistant message to backend:', error);
-          // Continue even if saving fails
-        }
+      // If we got a conversation_id back from the backend, update the thread
+      if (response.conversation_id && response.conversation_id !== threadId) {
+        // Update the thread ID to match the backend conversation ID
+        set((s) => {
+          const oldThread = s.threads.find(t => t.id === threadId);
+          if (oldThread) {
+            const newThreads = s.threads.map(t => 
+              t.id === threadId ? { ...t, id: response.conversation_id! } : t
+            );
+            const newMessagesByThread = { ...s.messagesByThread };
+            newMessagesByThread[response.conversation_id!] = newMessagesByThread[threadId];
+            delete newMessagesByThread[threadId];
+            
+            return {
+              threads: newThreads,
+              messagesByThread: newMessagesByThread,
+              activeThreadId: response.conversation_id!
+            };
+          }
+          return s;
+        });
       }
       
     } catch (error) {

@@ -8,10 +8,13 @@ import { getAccessToken } from '../lib/cookies';
 export interface ChatRequest {
   user_id: string;
   message: string;
+  conversation_id?: string;
+  auth_token?: string;
 }
 
 export interface ChatResponse {
   response: string;
+  conversation_id?: string;
 }
 
 export interface MemoryRequest {
@@ -380,8 +383,13 @@ export const apiClient = new APIClient();
 
 // Utility functions for easier usage
 export const chatAPI = {
-  sendMessage: (userId: string, message: string) => 
-    apiClient.sendChatMessage({ user_id: userId, message }),
+  sendMessage: (userId: string, message: string, conversationId?: string, authToken?: string) => 
+    apiClient.sendChatMessage({ 
+      user_id: userId, 
+      message, 
+      conversation_id: conversationId,
+      auth_token: authToken 
+    }),
   
   storeMemory: (userId: string, content: string, importance?: number) =>
     apiClient.storeMemory({ user_id: userId, content, importance }),

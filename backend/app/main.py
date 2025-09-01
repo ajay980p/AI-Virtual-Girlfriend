@@ -1,7 +1,9 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import chat, memory, user
+from app.config import get_settings
 
+settings = get_settings()
 router = APIRouter()
 
 app = FastAPI(
@@ -12,7 +14,7 @@ app = FastAPI(
 # Add CORS middleware to allow frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Frontend URLs
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -21,6 +23,24 @@ app.add_middleware(
 @router.get("/")
 def test():
     return {"msg": "This is the root endpoint!"}
+
+@router.get("/ping")
+def ping():
+    return {"status": "ok"}
+
+@router.get("/health")
+async def health():
+    from app.services.auth_client import get_auth_client
+    auth_client = get_auth_client()
+    
+    auth_service_healthy = await auth_client.health_check()
+    
+    return {
+        "status": "ok",
+        "services": {
+            "auth_service": "healthy" if auth_service_healthy else "unhealthy"
+        }
+    }
 
 # Register API routes
 app.include_router(router, tags=["Test"])

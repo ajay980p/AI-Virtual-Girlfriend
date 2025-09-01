@@ -13,11 +13,11 @@ RAG Components:
 - Memory Service: Orchestrates the RAG workflow
 """
 
-# Import real services for RAG implementation
-from app.services.embedding_service import embed_text, embed_texts_batch
-from app.services.llm_service import call_llm
-from app.services.pinecone_service import find_similar_memory, upsert_memory
-print("✅ Using real services for RAG implementation")
+# Import mock services for testing
+from app.services.mock_embedding_service import embed_text, embed_texts_batch
+from app.services.mock_llm_service import generate_response
+from app.services.mock_pinecone_service import store_memory, query_memories
+print("✅ Using mock services for testing")
 
 import logging
 from typing import List, Dict, Any
@@ -91,9 +91,9 @@ async def generate_chat_response(payload) -> str:
         # Search the vector database for memories similar to the current message
         # This is the 'R' in RAG - finding relevant context
         logger.info("🔍 Step 2: Retrieving relevant memories from vector database...")
-        retrieved_memories = await find_similar_memory(
+        retrieved_memories = await query_memories(
             user_id=payload.user_id, 
-            vector=embedded_query,
+            query_vector=embedded_query,
             top_k=5  # Get top 5 most relevant memories
         )
         logger.info(f"✅ Retrieved {len(retrieved_memories)} relevant memories for context")
@@ -114,7 +114,11 @@ async def generate_chat_response(payload) -> str:
         # Use the LLM to generate a response based on the augmented prompt
         # This is the 'G' in RAG - generating contextually aware responses
         logger.info("🧠 Step 4: Generating response with LLM...")
-        response = await call_llm(full_prompt)
+        response = await generate_response(
+            user_message=payload.message,
+            retrieved_memories=retrieved_memories,
+            user_id=payload.user_id
+        )
         logger.info(f"✅ Generated {len(response)} character response")
         
         # ========================================
@@ -279,18 +283,18 @@ async def store_conversation_memory(user_id: str, user_message: str, ai_response
         logger.info(f"✅ Generated embeddings for memory storage")
         
         # Store user message with metadata
-        upsert_memory(
+        await store_memory(
             user_id=user_id, 
+            text=texts_to_embed[0],
             vector=embeddings[0], 
-            text=texts_to_embed[0], 
             memory_type="user_message"
         )
         
         # Store AI response with metadata
-        upsert_memory(
+        await store_memory(
             user_id=user_id, 
+            text=texts_to_embed[1],
             vector=embeddings[1], 
-            text=texts_to_embed[1], 
             memory_type="ai_response"
         )
         
@@ -350,7 +354,7 @@ async def store_multiple_memories(user_id: str, memory_texts: list[str], memory_
         
         # Store each memory with its corresponding embedding and type
         for text, embedding, memory_type in zip(memory_texts, embeddings, memory_types):
-            upsert_memory(user_id, embedding, text, memory_type)
+            await store_memory(user_id, text, embedding, memory_type)
         
         logger.info(f"✅ Successfully stored {len(memory_texts)} memories for user {user_id}")
         
@@ -417,11 +421,11 @@ async def validate_rag_system() -> Dict[str, bool]:
         
         # Test vector database (basic connection)
         test_user = "test_validation_user"
-        test_memories = await find_similar_memory(test_user, test_embedding, top_k=1)
+        test_memories = await query_memories(test_user, test_embedding, top_k=1)
         validation_results["vector_database"] = isinstance(test_memories, list)
         
         # Test LLM service
-        test_response = await call_llm("Respond with 'OK' if you can see this.")
+        test_response = await generate_response("Respond with 'OK' if you can see this.", [], test_user)
         validation_results["llm_service"] = len(test_response) > 0
         
         # Test memory pipeline (if all components work)
