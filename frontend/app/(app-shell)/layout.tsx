@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Home, MessageSquare, Cog, Brain, X, Sun, Moon } from "lucide-react";
+import { Menu, Home, MessageSquare, Cog, Brain, X, Sun, Moon, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import LogoutButton from "../../components/auth/LogoutButton";
 
@@ -87,6 +87,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
           <nav className={`${sidebarOpen ? 'p-6' : 'p-3'} space-y-2`}>
             <NavItem href="/dashboard" label="Dashboard" icon={Home} collapsed={!sidebarOpen} />
             <NavItem href="/chat" label="Chat" icon={MessageSquare} collapsed={!sidebarOpen} />
+            <NavItem href="/models" label="Models" icon={Users} collapsed={!sidebarOpen} />
             <NavItem href="/settings" label="Settings" icon={Cog} collapsed={!sidebarOpen} />
           </nav>
         </div>
@@ -139,6 +140,14 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
                       Online • Thinking of you
                     </div>
                   </div>
+                </div>
+              )}
+              
+              {/* Models header for models page */}
+              {pathname.startsWith("/models") && (
+                <div>
+                  <h1 className="text-foreground text-2xl font-bold">Models</h1>
+                  <p className="text-muted-foreground">Create and manage your AI companions</p>
                 </div>
               )}
               

@@ -1,5 +1,6 @@
 import HealthCard from "@/components/dashboard/HealthCard";
 import RecentChats from "@/components/dashboard/RecentChats";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const hour = new Date().getHours();
@@ -28,6 +29,12 @@ export default function DashboardPage() {
           >
             💬 Start new chat →
           </a>
+          <Link 
+            href="/models/create"
+            className="inline-flex items-center gap-2 rounded-lg bg-purple-600 hover:bg-purple-700 px-6 py-3 text-sm font-medium text-white transition-colors cursor-pointer"
+          >
+            ✨ Create Model →
+          </Link>
           <button className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors cursor-pointer">
             📅 Daily check-in
           </button>
@@ -106,6 +113,82 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Your Models Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+              <span className="text-purple-500">👤</span>
+              Your Models
+            </h2>
+            <p className="text-muted-foreground text-sm">Create and chat with your custom AI companions</p>
+          </div>
+          <Link 
+            href="/models"
+            className="text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+          >
+            View all →
+          </Link>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Create New Model Card */}
+          <Link
+            href="/models/create"
+            className="group p-6 bg-gradient-to-br from-purple-600/10 to-purple-800/10 rounded-lg border border-purple-600/20 hover:border-purple-500/40 transition-all duration-200 cursor-pointer"
+          >
+            <div className="text-center space-y-3">
+              <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto group-hover:bg-purple-600/30 transition-colors">
+                <span className="text-2xl">➕</span>
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground mb-1">Create New Model</h3>
+                <p className="text-sm text-muted-foreground">Design your perfect AI companion</p>
+              </div>
+            </div>
+          </Link>
+          
+          {/* Sample Model Cards */}
+          <div className="p-6 bg-card rounded-lg border border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">L</span>
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground">Luna</h3>
+                <p className="text-xs text-muted-foreground">Mysterious Artist</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">Creative and mysterious, loves poetry and stargazing...</p>
+            <Link
+              href="/chat?model=luna"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+            >
+              Chat now →
+            </Link>
+          </div>
+          
+          <div className="p-6 bg-card rounded-lg border border-border">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-red-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">A</span>
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground">Aria</h3>
+                <p className="text-xs text-muted-foreground">Tech Enthusiast</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">Energetic gamer who loves technology and adventures...</p>
+            <Link
+              href="/chat?model=aria"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+            >
+              Chat now →
+            </Link>
           </div>
         </div>
       </div>

@@ -5,12 +5,73 @@ export interface Avatar {
   bio: string;
   image: string;
   personality: string[];
-  category: 'all' | 'realistic' | 'anime';
+  category: 'all' | 'realistic' | 'anime' | 'custom';
   tags: string[];
+  // Enhanced fields for custom models
+  isCustom?: boolean;
+  createdBy?: string; // user ID
+  emotions?: EmotionalProfile;
+  appearance?: AppearanceProfile;
+  interests?: string[];
+  backstory?: string;
+  voiceStyle?: VoiceProfile;
+  relationshipStyle?: RelationshipProfile;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface EmotionalProfile {
+  dominantEmotion: string; // happy, calm, mysterious, playful, etc.
+  emotionalRange: number; // 1-10 scale
+  empathyLevel: number; // 1-10 scale
+  humorStyle: 'witty' | 'playful' | 'sarcastic' | 'gentle' | 'quirky';
+  communication: 'direct' | 'gentle' | 'poetic' | 'casual' | 'formal';
+}
+
+export interface AppearanceProfile {
+  hairColor: string;
+  hairStyle: string;
+  eyeColor: string;
+  skinTone: string;
+  height: string;
+  bodyType: string;
+  style: string; // fashion style
+  accessories?: string[];
+}
+
+export interface VoiceProfile {
+  tone: 'soft' | 'warm' | 'energetic' | 'mysterious' | 'sweet';
+  accent?: string;
+  pace: 'slow' | 'moderate' | 'fast';
+  expressiveness: number; // 1-10 scale
+}
+
+export interface RelationshipProfile {
+  intimacyLevel: 'friend' | 'romantic' | 'companion' | 'mentor';
+  loyaltyLevel: number; // 1-10 scale
+  jealousyLevel: number; // 1-10 scale
+  supportiveness: number; // 1-10 scale
+  playfulness: number; // 1-10 scale
+}
+
+export interface CreateModelRequest {
+  name: string;
+  age: number;
+  bio: string;
+  images: File[]; // Multiple image uploads
+  personality: string[];
+  category: 'realistic' | 'anime' | 'custom';
+  tags: string[];
+  emotions: EmotionalProfile;
+  appearance: AppearanceProfile;
+  interests: string[];
+  backstory: string;
+  voiceStyle: VoiceProfile;
+  relationshipStyle: RelationshipProfile;
 }
 
 export interface AvatarCategory {
-  id: 'all' | 'realistic' | 'anime';
+  id: 'all' | 'realistic' | 'anime' | 'custom';
   label: string;
   active: boolean;
 }
@@ -82,5 +143,6 @@ export const avatars: Avatar[] = [
 export const categories: AvatarCategory[] = [
   { id: 'all', label: 'All Models', active: true },
   { id: 'realistic', label: 'Realistic', active: false },
-  { id: 'anime', label: 'Anime', active: false }
+  { id: 'anime', label: 'Anime', active: false },
+  { id: 'custom', label: 'My Models', active: false }
 ];
