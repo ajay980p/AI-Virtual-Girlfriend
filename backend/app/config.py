@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings(BaseSettings):
-    """Application settings loaded from environment variables."""
+    """Application settings loaded from environment variabless."""
     
     # Server Configuration
     host: str = Field(default="localhost", alias="BACKEND_HOST")

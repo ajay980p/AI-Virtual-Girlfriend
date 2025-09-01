@@ -13,11 +13,11 @@ RAG Components:
 - Memory Service: Orchestrates the RAG workflow
 """
 
-# Import mock services for testing
-from app.services.mock_embedding_service import embed_text, embed_texts_batch
-from app.services.mock_llm_service import generate_response
-from app.services.mock_pinecone_service import store_memory, query_memories
-print("✅ Using mock services for testing")
+# Import services with fallback to mock functions
+from app.services.embedding_service import embed_text, embed_texts_batch
+from app.services.llm_service import generate_response
+from app.services.pinecone_service import store_memory, query_memories, find_similar_memory
+print("✅ Using services with mock fallbacks for testing")
 
 import logging
 from typing import List, Dict, Any
