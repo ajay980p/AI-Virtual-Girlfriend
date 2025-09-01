@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Send, Smile, Mic } from "lucide-react";
 import { useChatStore } from "@/store/chat.store";
 import { useUIStore } from "@/store/ui.store";
+import { useChatHistory } from "@/hooks/useChatHistory";
 
 interface Message {
   id: string;
@@ -23,6 +24,9 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
+  
+  // Load chat history automatically when user logs in
+  const { isLoadingHistory } = useChatHistory();
   
   // Use the chat store for proper backend integration
   const activeThreadId = useChatStore((s) => s.activeThreadId);
@@ -84,6 +88,18 @@ export default function ChatPage() {
 
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col bg-background">
+      {/* Loading History Indicator */}
+      {isLoadingHistory && (
+        <div className="mx-6 mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
+          <div className="flex items-center gap-2">
+            <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Loading your chat history...
+            </p>
+          </div>
+        </div>
+      )}
+      
       {/* Error Message */}
       {error && (
         <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
