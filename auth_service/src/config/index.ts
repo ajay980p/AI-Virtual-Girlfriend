@@ -40,17 +40,17 @@ interface Config {
 
 const config: Config = {
   app: {
-    port: parseInt(process.env.PORT || '3001', 10),
+    port: parseInt(process.env.PORT || '4500', 10),
     env: process.env.NODE_ENV || 'development',
   },
   database: {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/ai_girlfriend_auth_dev',
   },
   jwt: {
-    secret: process.env.JWT_SECRET || 'dev-jwt-secret-not-for-production',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-refresh-jwt-secret-not-for-production',
-    expiresIn: process.env.JWT_EXPIRE || '15m',
-    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRE || '7d',
+    secret: process.env.JWT_SECRET || 'dev-jwt-secret-not-for-production' as string,
+    refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-refresh-jwt-secret-not-for-production' as string,
+    expiresIn: process.env.JWT_EXPIRE || '15m' as string,
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRE || '7d' as string,
   },
   security: {
     bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10),

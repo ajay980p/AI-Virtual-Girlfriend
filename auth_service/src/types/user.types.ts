@@ -64,7 +64,7 @@ export interface IAuthResponse {
 export interface IJWTPayload {
   userId: string;
   email: string;
-  type: 'access' | 'refresh';
+  type?: string;
 }
 
 export interface IPasswordResetRequest {

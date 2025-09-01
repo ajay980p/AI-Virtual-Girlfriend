@@ -1,15 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import AuthModal from "@/components/auth/AuthModal";
+import { useRouter } from "next/navigation";
 
 export default function HeroSection() {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
+  const router = useRouter();
 
-  const openAuthModal = (mode: "signin" | "signup") => {
-    setAuthMode(mode);
-    setIsAuthModalOpen(true);
+  const navigateToAuth = (mode: "signin" | "signup") => {
+    router.push(`/auth/${mode}`);
   };
   return (
     <section className="relative py-20 lg:py-32">
@@ -32,13 +29,13 @@ export default function HeroSection() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
-                onClick={() => openAuthModal("signup")}
+                onClick={() => navigateToAuth("signup")}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium bg-primary text-white rounded-xl hover:bg-primary/90 transition-all duration-200 transform hover:scale-105 cursor-pointer"
               >
                 ✨ Create For Free
               </button>
               <button 
-                onClick={() => openAuthModal("signin")}
+                onClick={() => navigateToAuth("signin")}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-medium border border-border text-muted-foreground rounded-xl hover:bg-secondary transition-all duration-200 cursor-pointer"
               >
                 🎮 Explore Gallery
@@ -104,13 +101,6 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
-      
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        initialMode={authMode}
-      />
     </section>
   );
 }

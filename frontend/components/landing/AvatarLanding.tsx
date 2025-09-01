@@ -7,12 +7,9 @@ import AvatarCard from "@/components/landing/AvatarCard";
 import CategoryFilter from "@/components/landing/CategoryFilter";
 import HeroSection from "@/components/landing/HeroSection";
 import Navbar from "@/components/landing/Navbar";
-import AuthModal from "@/components/auth/AuthModal";
 
 export default function AvatarLanding() {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'realistic' | 'anime'>('all');
-  const [selectedAvatar, setSelectedAvatar] = useState<Avatar | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const router = useRouter();
 
   // Filter avatars based on selected category
@@ -21,14 +18,12 @@ export default function AvatarLanding() {
     : avatars.filter(avatar => avatar.category === selectedCategory);
 
   const handleAvatarSelect = (avatar: Avatar) => {
-    setSelectedAvatar(avatar);
-    setIsAuthModalOpen(true);
-  };
-
-  const handleAuthSuccess = () => {
-    setIsAuthModalOpen(false);
-    // Redirect to dashboard after successful auth
-    router.push("/dashboard");
+    // Store selected avatar and navigate to signup
+    localStorage.setItem('selectedAvatar', JSON.stringify({
+      id: avatar.id,
+      name: avatar.name
+    }));
+    router.push('/auth/signup');
   };
 
   const handleCategoryChange = (category: 'all' | 'realistic' | 'anime') => {
@@ -101,13 +96,6 @@ export default function AvatarLanding() {
           </div>
         </footer>
       </div>
-      
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        selectedAvatar={selectedAvatar ? { id: selectedAvatar.id, name: selectedAvatar.name } : null}
-      />
     </div>
   );
 }

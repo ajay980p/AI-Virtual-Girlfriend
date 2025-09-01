@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "../../store/auth.store";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -22,9 +23,15 @@ export default function AuthModal({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
   
   const router = useRouter();
+  
+  // Auth store
+  const { login, register, isLoading, error, clearError } = useAuthStore();
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -33,9 +40,13 @@ export default function AuthModal({
       setEmail("");
       setPassword("");
       setConfirmPassword("");
-      setIsLoading(false);
+      setFullName("");
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+      setAgreeToTerms(false);
+      clearError();
     }
-  }, [isOpen, initialMode]);
+  }, [isOpen, initialMode, clearError]);
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -59,11 +70,39 @@ export default function AuthModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    clearError();
     
-    // Simulate authentication
-    setTimeout(() => {
-      setIsLoading(false);
+    // Validation
+    if (mode === "signup") {
+      if (password !== confirmPassword) {
+        // Handle password mismatch (you could set a local state for this error)
+        return;
+      }
+      
+      if (!fullName.trim()) {
+        return;
+      }
+      
+      if (!agreeToTerms) {
+        return;
+      }
+    }
+    
+    let success = false;
+    
+    if (mode === "signin") {
+      success = await login({ email, password });
+    } else {
+      const [firstName, lastName] = fullName.trim().split(' ');
+      success = await register({ 
+        email, 
+        password, 
+        firstName: firstName || fullName.trim(), 
+        lastName: lastName || '' 
+      });
+    }
+    
+    if (success) {
       if (onSuccess) {
         onSuccess();
       } else {
@@ -71,7 +110,7 @@ export default function AuthModal({
         // Redirect to dashboard after successful auth
         router.push("/dashboard");
       }
-    }, 1500);
+    }
   };
 
   const switchMode = () => {
@@ -79,6 +118,11 @@ export default function AuthModal({
     setEmail("");
     setPassword("");
     setConfirmPassword("");
+    setFullName("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    setAgreeToTerms(false);
+    clearError();
   };
 
   if (!isOpen) return null;
@@ -87,112 +131,202 @@ export default function AuthModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Enhanced Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-lg"
+        className="absolute inset-0 bg-black/90 backdrop-blur-lg"
         onClick={onClose}
       />
       
       {/* Modal Content */}
-      <div className="relative w-full max-w-md animate-scale-in">
-        <div className="bg-card/95 backdrop-blur-xl rounded-3xl p-8 border border-border/60 shadow-2xl shadow-black/40">
+      <div className="relative w-full max-w-lg animate-scale-in">
+        <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800 shadow-2xl shadow-black/40">
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-muted/30 hover:bg-muted/50 flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-sm border border-border/20"
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center transition-all duration-200 cursor-pointer border border-zinc-700"
           >
-            <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-primary via-primary to-accent flex items-center justify-center shadow-lg shadow-primary/25">
-              <span className="text-white font-bold text-2xl">🧠</span>
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center shadow-lg">
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-3">
-              {mode === "signin" ? "Welcome Back" : "Join Project Aria"}
+            <h1 className="text-3xl font-bold text-white mb-3">
+              {mode === "signin" ? "Welcome Back" : "Join Us Today"}
             </h1>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-gray-400 text-base">
               {mode === "signin" 
-                ? "Sign in to continue your AI journey" 
-                : "Create your account and meet your AI companion"
+                ? "Sign in to continue your conversations with your AI companions" 
+                : "Create your account and meet your perfect AI companion"
               }
             </p>
           </div>
 
-          {/* Selected Avatar Info */}
-          {selectedAvatar && (
-            <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/30 backdrop-blur-sm">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/20">
-                  <span className="text-2xl">💍</span>
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-foreground mb-1">
-                    Ready to chat with <span className="text-primary">{selectedAvatar.name}</span>
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Complete authentication to start your conversation
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                <p className="text-red-400 text-sm font-medium">{error}</p>
+              </div>
+            )}
+
+            {/* Full Name Field for Signup */}
+            {mode === "signup" && (
+              <div>
+                <label className="block text-sm font-medium text-white mb-3">
+                  Full Name
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-zinc-800 border border-zinc-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-base"
+                    placeholder="Ajay"
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-3">
-                Email Address
+              <label className="block text-sm font-medium text-white mb-3">
+                Email
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl bg-input/80 backdrop-blur-sm border border-border/60 text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary/50 transition-all duration-200 text-base"
-                placeholder="Enter your email address"
-                required
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full pl-12 pr-4 py-4 rounded-xl border text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-base ${
+                    mode === "signup" && email === "ajay980p@gmail.com" 
+                      ? "bg-white text-black" 
+                      : "bg-zinc-800 border-zinc-700"
+                  }`}
+                  placeholder={mode === "signin" ? "Enter your email" : "ajay980p@gmail.com"}
+                  required
+                />
+              </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-3">
+              <label className="block text-sm font-medium text-white mb-3">
                 Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl bg-input/80 backdrop-blur-sm border border-border/60 text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary/50 transition-all duration-200 text-base"
-                placeholder="Enter your password"
-                required
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                  </svg>
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-12 pr-12 py-4 rounded-xl bg-zinc-800 border border-zinc-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-base"
+                  placeholder={mode === "signin" ? "Enter your password" : "••••••••••"}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer"
+                >
+                  <svg className="w-5 h-5 text-gray-400 hover:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                    {showPassword ? (
+                      <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                    ) : (
+                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Confirm Password for Signup */}
             {mode === "signup" && (
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-3">
+                <label className="block text-sm font-medium text-white mb-3">
                   Confirm Password
                 </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-5 py-4 rounded-2xl bg-input/80 backdrop-blur-sm border border-border/60 text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary/50 transition-all duration-200 text-base"
-                  placeholder="Confirm your password"
-                  required
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                    </svg>
+                  </div>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full pl-12 pr-12 py-4 rounded-xl bg-zinc-800 border border-zinc-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-base"
+                    placeholder="••••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer"
+                  >
+                    <svg className="w-5 h-5 text-gray-400 hover:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                      {showConfirmPassword ? (
+                        <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>
+                      ) : (
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                      )}
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Terms Checkbox for Signup */}
+            {mode === "signup" && (
+              <div className="flex items-start gap-3">
+                <div className="flex items-center h-5">
+                  <input
+                    type="checkbox"
+                    checked={agreeToTerms}
+                    onChange={(e) => setAgreeToTerms(e.target.checked)}
+                    className="w-4 h-4 border border-zinc-600 rounded bg-zinc-800 focus:ring-2 focus:ring-purple-500 text-purple-600 cursor-pointer"
+                    required
+                  />
+                </div>
+                <label className="text-sm text-white cursor-pointer" onClick={() => setAgreeToTerms(!agreeToTerms)}>
+                  I agree to the{" "}
+                  <span className="text-purple-400 hover:text-purple-300 cursor-pointer">
+                    Terms of Service
+                  </span>{" "}
+                  and{" "}
+                  <span className="text-purple-400 hover:text-purple-300 cursor-pointer">
+                    Privacy Policy
+                  </span>
+                </label>
               </div>
             )}
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-4 px-6 bg-gradient-to-r from-primary to-accent text-white rounded-2xl font-semibold text-lg hover:from-primary/90 hover:to-accent/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-primary/25"
+              disabled={isLoading || (mode === "signup" && !agreeToTerms)}
+              className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-purple-800 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-3">
@@ -207,18 +341,18 @@ export default function AuthModal({
             {/* Divider */}
             <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/60" />
+                <div className="w-full border-t border-zinc-700" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-card px-6 text-muted-foreground font-medium">Or continue with</span>
+                <span className="bg-zinc-900 px-6 text-gray-400 font-medium">OR CONTINUE WITH</span>
               </div>
             </div>
 
-            {/* Google Sign In Button - Placeholder for future implementation */}
+            {/* Google Sign In Button */}
             <button
               type="button"
               disabled
-              className="w-full py-4 px-6 border border-border/60 rounded-2xl font-semibold text-muted-foreground hover:bg-secondary/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 backdrop-blur-sm"
+              className="w-full py-4 px-6 border border-zinc-700 rounded-xl font-semibold text-white hover:bg-zinc-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -227,34 +361,19 @@ export default function AuthModal({
                 <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
               Continue with Google
-              <span className="text-xs text-muted-foreground ml-2">(Coming Soon)</span>
             </button>
           </form>
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <p className="text-base text-muted-foreground">
+            <p className="text-base text-gray-400">
               {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
                 onClick={switchMode}
-                className="text-primary hover:text-primary/80 font-semibold cursor-pointer transition-colors"
+                className="text-purple-400 hover:text-purple-300 font-semibold cursor-pointer transition-colors"
               >
-                {mode === "signin" ? "Create one" : "Sign in"}
+                {mode === "signin" ? "Sign up" : "Sign in"}
               </button>
-            </p>
-          </div>
-
-          {/* Terms */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              By continuing, you agree to our{" "}
-              <span className="text-primary cursor-pointer hover:text-primary/80 transition-colors">
-                Terms of Service
-              </span>{" "}
-              and{" "}
-              <span className="text-primary cursor-pointer hover:text-primary/80 transition-colors">
-                Privacy Policy
-              </span>
             </p>
           </div>
         </div>

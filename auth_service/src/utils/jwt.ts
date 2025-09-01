@@ -1,160 +1,106 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt, { type Secret, type SignOptions, type JwtPayload } from 'jsonwebtoken';
 import crypto from 'crypto';
 import config from '../config';
 import { IJWTPayload, IAuthTokens } from '../types/user.types';
 
+const ACCESS_SECRET: Secret = config.jwt.secret;
+const REFRESH_SECRET: Secret = config.jwt.refreshSecret;
+
+const ACCESS_EXPIRES_IN: SignOptions['expiresIn'] =
+  (config.jwt.expiresIn as SignOptions['expiresIn']) || '15m';
+
+const REFRESH_EXPIRES_IN: SignOptions['expiresIn'] =
+  (config.jwt.refreshExpiresIn as SignOptions['expiresIn']) || '7d';
+
 export class JWTUtil {
-  /**
-   * Generate access token
-   */
+ 
   static generateAccessToken(payload: Omit<IJWTPayload, 'type'>): string {
     return jwt.sign(
       { ...payload, type: 'access' },
-      config.jwt.secret,
-      { 
-        expiresIn: config.jwt.expiresIn,
-        issuer: 'ai-girlfriend-auth-service',
-        audience: 'ai-girlfriend-app'
-      }
+      ACCESS_SECRET,
+      { expiresIn: ACCESS_EXPIRES_IN }
     );
   }
 
-  /**
-   * Generate refresh token
-   */
   static generateRefreshToken(payload: Omit<IJWTPayload, 'type'>): string {
     return jwt.sign(
       { ...payload, type: 'refresh' },
-      config.jwt.refreshSecret,
-      { 
-        expiresIn: config.jwt.refreshExpiresIn,
-        issuer: 'ai-girlfriend-auth-service',
-        audience: 'ai-girlfriend-app'
-      }
+      REFRESH_SECRET,
+      { expiresIn: REFRESH_EXPIRES_IN }
     );
   }
 
-  /**
-   * Generate both access and refresh tokens
-   */
   static generateTokenPair(userId: string, email: string): IAuthTokens {
     const payload = { userId, email };
-    
     return {
       accessToken: this.generateAccessToken(payload),
-      refreshToken: this.generateRefreshToken(payload)
+      refreshToken: this.generateRefreshToken(payload),
     };
   }
 
-  /**
-   * Verify access token
-   */
   static verifyAccessToken(token: string): IJWTPayload {
     try {
-      const decoded = jwt.verify(token, config.jwt.secret, {
-        issuer: 'ai-girlfriend-auth-service',
-        audience: 'ai-girlfriend-app'
-      }) as IJWTPayload;
-      
-      if (decoded.type !== 'access') {
+      const decoded = jwt.verify(token, ACCESS_SECRET) as JwtPayload & IJWTPayload | string;
+      if (typeof decoded === 'string' || decoded.type !== 'access') {
         throw new Error('Invalid token type');
       }
-      
       return decoded;
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        throw new Error('Access token expired');
-      } else if (error instanceof jwt.JsonWebTokenError) {
-        throw new Error('Invalid access token');
-      } else {
-        throw new Error('Token verification failed');
-      }
+      if (error instanceof jwt.TokenExpiredError) throw new Error('Access token expired');
+      if (error instanceof jwt.JsonWebTokenError) throw new Error('Invalid access token');
+      throw new Error('Token verification failed');
     }
   }
 
-  /**
-   * Verify refresh token
-   */
   static verifyRefreshToken(token: string): IJWTPayload {
     try {
-      const decoded = jwt.verify(token, config.jwt.refreshSecret, {
-        issuer: 'ai-girlfriend-auth-service',
-        audience: 'ai-girlfriend-app'
-      }) as IJWTPayload;
-      
-      if (decoded.type !== 'refresh') {
+      const decoded = jwt.verify(token, REFRESH_SECRET) as JwtPayload & IJWTPayload | string;
+      if (typeof decoded === 'string' || decoded.type !== 'refresh') {
         throw new Error('Invalid token type');
       }
-      
       return decoded;
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        throw new Error('Refresh token expired');
-      } else if (error instanceof jwt.JsonWebTokenError) {
-        throw new Error('Invalid refresh token');
-      } else {
-        throw new Error('Token verification failed');
-      }
+      if (error instanceof jwt.TokenExpiredError) throw new Error('Refresh token expired');
+      if (error instanceof jwt.JsonWebTokenError) throw new Error('Invalid refresh token');
+      throw new Error('Token verification failed');
     }
   }
 
-  /**
-   * Extract token from Authorization header
-   */
   static extractTokenFromHeader(authHeader: string | undefined): string | null {
     if (!authHeader) return null;
-    
     const parts = authHeader.split(' ');
     if (parts.length !== 2 || parts[0] !== 'Bearer') return null;
-    
     return parts[1];
   }
 
-  /**
-   * Generate secure random token for password reset, email verification, etc.
-   */
   static generateSecureToken(): string {
     return crypto.randomBytes(32).toString('hex');
   }
 
-  /**
-   * Hash token for storage
-   */
   static hashToken(token: string): string {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 
-  /**
-   * Get token expiration time
-   */
   static getTokenExpiration(token: string): Date | null {
     try {
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as JwtPayload | null;
       if (!decoded || !decoded.exp) return null;
-      
       return new Date(decoded.exp * 1000);
-    } catch (error) {
+    } catch {
       return null;
     }
   }
 
-  /**
-   * Check if token is expired
-   */
   static isTokenExpired(token: string): boolean {
     const expiration = this.getTokenExpiration(token);
     if (!expiration) return true;
-    
     return expiration < new Date();
   }
 
-  /**
-   * Decode token without verification (for debugging purposes)
-   */
-  static decodeToken(token: string): any {
+  static decodeToken(token: string): JwtPayload | string | null {
     try {
       return jwt.decode(token);
-    } catch (error) {
+    } catch {
       return null;
     }
   }

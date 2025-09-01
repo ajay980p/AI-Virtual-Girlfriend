@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Home, MessageSquare, Cog, Brain, X, Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
+import LogoutButton from "../../components/auth/LogoutButton";
 
 export default function AppShellLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -150,18 +151,22 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
               )}
             </div>
             
-            {/* Dark/Light mode toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
-              title={lightMode ? 'Switch to dark mode' : 'Switch to light mode'}
-            >
-              {lightMode ? (
-                <Moon className="h-5 w-5 text-muted-foreground" />
-              ) : (
-                <Sun className="h-5 w-5 text-yellow-500" />
-              )}
-            </button>
+            {/* Dark/Light mode toggle and Logout */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-secondary transition-colors cursor-pointer"
+                title={lightMode ? 'Switch to dark mode' : 'Switch to light mode'}
+              >
+                {lightMode ? (
+                  <Moon className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <Sun className="h-5 w-5 text-yellow-500" />
+                )}
+              </button>
+              
+              <LogoutButton variant="icon" showConfirmDialog={true} />
+            </div>
           </div>
         </header>
 

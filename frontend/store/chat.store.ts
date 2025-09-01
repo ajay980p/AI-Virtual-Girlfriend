@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import type { Thread } from "@/types/thread";
 import type { Message } from "@/types/message";
 import { useUIStore } from "./ui.store";
+import { useAuthStore } from "./auth.store";
 import { chatAPI, BackendAPIError } from "@/lib/api";
 
 type MessagesByThread = Record<string, Message[]>;
@@ -41,7 +42,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   threads: [seedThread],
   messagesByThread: { [seedThread.id]: seedMessages },
   activeThreadId: seedThread.id,
-  userId: nanoid(), // Generate unique user ID
+  userId: '', // Will be set from auth store
   isLoading: false,
   error: null,
 
@@ -63,8 +64,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
   selectThread: (id) => set({ activeThreadId: id }),
 
   sendMessage: async (threadId, { content, vibe }) => {
-    const { userId } = get();
+    const authState = useAuthStore.getState();
+    const userId = authState.user?._id || 'anonymous';
     const ui = useUIStore.getState();
+    
+    // Update userId in chat store if authenticated
+    if (authState.user?._id && get().userId !== authState.user._id) {
+      set({ userId: authState.user._id });
+    }
     
     // Clear any previous errors
     set({ error: null });

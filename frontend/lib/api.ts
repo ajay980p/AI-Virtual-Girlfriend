@@ -2,6 +2,9 @@
  * API Client for communicating with the backend
  */
 
+import { ensureValidToken } from '../hooks/useTokenRefresh';
+import { getAccessToken } from '../lib/cookies';
+
 export interface ChatRequest {
   user_id: string;
   message: string;
@@ -41,15 +44,28 @@ class APIClient {
     this.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
   }
 
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const token = await ensureValidToken();
+    if (token) {
+      return { Authorization: `Bearer ${token}` };
+    }
+    return {};
+  }
+
   private async makeRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    includeAuth: boolean = true
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    
+    // Get auth headers if needed
+    const authHeaders = includeAuth ? await this.getAuthHeaders() : {};
     
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders,
         ...options.headers,
       },
       ...options,
@@ -97,7 +113,7 @@ class APIClient {
     return this.makeRequest<ChatResponse>('/chat/respond', {
       method: 'POST',
       body: JSON.stringify(request),
-    });
+    }, true); // Include auth
   }
 
   /**
@@ -107,21 +123,21 @@ class APIClient {
     return this.makeRequest<{ message: string }>('/memory/', {
       method: 'POST',
       body: JSON.stringify(request),
-    });
+    }, true); // Include auth
   }
 
   /**
    * Health check
    */
   async healthCheck(): Promise<{ status: string }> {
-    return this.makeRequest<{ status: string }>('/ping');
+    return this.makeRequest<{ status: string }>('/ping', {}, false); // No auth needed
   }
 
   /**
    * Test root endpoint
    */
   async testConnection(): Promise<{ msg: string }> {
-    return this.makeRequest<{ msg: string }>('/');
+    return this.makeRequest<{ msg: string }>('/', {}, false); // No auth needed
   }
 }
 

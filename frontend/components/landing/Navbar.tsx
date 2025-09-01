@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import AuthModal from "@/components/auth/AuthModal";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const router = useRouter();
 
-  const openAuthModal = (mode: "signin" | "signup") => {
-    setAuthMode(mode);
-    setIsAuthModalOpen(true);
+  const navigateToAuth = (mode: "signin" | "signup") => {
+    router.push(`/auth/${mode}`);
     setIsMenuOpen(false); // Close mobile menu if open
   };
 
@@ -44,13 +42,13 @@ export default function Navbar() {
             {/* Action Buttons */}
             <div className="flex items-center gap-3 ml-6">
               <button 
-                onClick={() => openAuthModal("signin")}
+                onClick={() => navigateToAuth("signin")}
                 className="px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors cursor-pointer"
               >
                 Sign In
               </button>
               <button 
-                onClick={() => openAuthModal("signup")}
+                onClick={() => navigateToAuth("signup")}
                 className="px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 Create Account
@@ -90,13 +88,13 @@ export default function Navbar() {
             </a>
             <div className="pt-4 border-t border-border/20 space-y-3">
               <button 
-                onClick={() => openAuthModal("signin")}
+                onClick={() => navigateToAuth("signin")}
                 className="w-full px-4 py-2 text-sm font-medium text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors cursor-pointer"
               >
                 Sign In
               </button>
               <button 
-                onClick={() => openAuthModal("signup")}
+                onClick={() => navigateToAuth("signup")}
                 className="w-full px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 Create Account
@@ -105,13 +103,6 @@ export default function Navbar() {
           </div>
         )}
       </div>
-      
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        initialMode={authMode}
-      />
     </nav>
   );
 }

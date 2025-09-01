@@ -43,7 +43,7 @@ export class AuthController {
     });
 
     // Generate tokens
-    const tokens = JWTUtil.generateTokenPair(user._id?.toString() || user.id, user.email);
+    const tokens = JWTUtil.generateTokenPair((user._id?.toString() || user.id) as string, user.email);
 
     // Add refresh token to user
     await user.addRefreshToken(tokens.refreshToken);
@@ -108,7 +108,7 @@ export class AuthController {
     await user.save();
 
     // Generate tokens
-    const tokens = JWTUtil.generateTokenPair(user._id?.toString() || user.id, user.email);
+    const tokens = JWTUtil.generateTokenPair((user._id?.toString() || user.id) as string, user.email);
 
     // Add refresh token to user
     await user.addRefreshToken(tokens.refreshToken);
@@ -155,7 +155,7 @@ export class AuthController {
     }
 
     // Generate new tokens
-    const tokens = JWTUtil.generateTokenPair(user._id.toString(), user.email);
+    const tokens = JWTUtil.generateTokenPair((user._id?.toString() || user.id) as string, user.email);
 
     // Replace old refresh token with new one
     await user.removeRefreshToken(refreshToken);
