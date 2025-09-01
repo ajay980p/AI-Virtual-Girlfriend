@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
+import path from 'path';
 
 import config from './config';
 import swaggerSpecs from './config/swagger';
@@ -76,6 +77,9 @@ class App {
 
     // Trust proxy for rate limiting and security
     this.app.set('trust proxy', 1);
+
+    // Serve static files (uploaded images)
+    this.app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
   }
 
   private initializeRoutes(): void {

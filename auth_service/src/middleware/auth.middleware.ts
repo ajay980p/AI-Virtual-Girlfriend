@@ -52,7 +52,9 @@ export const authenticate = async (
     }
 
     // Attach user to request
-    req.user = user.toJSON() as unknown as IUserResponse;
+    const userResponse = user.toJSON() as unknown as IUserResponse;
+    userResponse.id = userResponse._id; // Add id field for compatibility
+    req.user = userResponse;
     next();
   } catch (error: any) {
     const response: ApiResponse = {
@@ -84,7 +86,9 @@ export const optionalAuthenticate = async (
     const user = await User.findById(decoded.userId);
 
     if (user && !user.isAccountLocked()) {
-      req.user = user.toJSON() as unknown as IUserResponse;
+      const userResponse = user.toJSON() as unknown as IUserResponse;
+      userResponse.id = userResponse._id; // Add id field for compatibility
+      req.user = userResponse;
     }
 
     next();
@@ -150,3 +154,6 @@ export const requireOwnership = (userIdParam: string = 'userId') => {
     next();
   };
 };
+
+// Export alias for backward compatibility
+export const authenticateToken = authenticate;

@@ -31,6 +31,7 @@ export interface IUserInput {
 
 export interface IUserResponse {
   _id: string;
+  id: string; // For compatibility
   email: string;
   firstName: string;
   lastName: string;

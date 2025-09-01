@@ -3,6 +3,42 @@ import Joi from 'joi';
 import { ApiResponse } from '../types/api.types';
 
 /**
+ * Generic validation middleware factory for different sources
+ */
+export const validateRequest = (schema: Joi.ObjectSchema, source: 'body' | 'query' | 'params' = 'body') => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const dataToValidate = source === 'body' ? req.body : source === 'query' ? req.query : req.params;
+    
+    const { error, value } = schema.validate(dataToValidate, { 
+      abortEarly: false,
+      stripUnknown: true 
+    });
+
+    if (error) {
+      const errors: Record<string, string> = {};
+      error.details.forEach((detail) => {
+        errors[detail.path.join('.')] = detail.message;
+      });
+
+      const response: ApiResponse = {
+        success: false,
+        message: 'Validation failed',
+        errors
+      };
+
+      res.status(400).json(response);
+      return;
+    }
+
+    if (source === 'body') req.body = value;
+    else if (source === 'query') req.query = value;
+    else req.params = value;
+    
+    next();
+  };
+};
+
+/**
  * Generic validation middleware factory
  */
 export const validate = (schema: Joi.ObjectSchema) => {
