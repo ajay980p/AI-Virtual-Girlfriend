@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Frontend Next.js Service
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      # These URLs point to the other services using their service names.
+      # Docker's internal network handles the routing!
+      - NEXT_PUBLIC_BACKEND_API_URL=http://backend:8000
+      - NEXT_PUBLIC_AUTH_API_URL=http://auth_service:3001
+    depends_on:
+      - backend
+      - auth_service
+
+  # Backend FastAPI Service
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    # You can add environment variables for database connections, API keys, etc.
+    # environment:
+    #   - DATABASE_URL=...
+
+  # Auth Express.js Service
+  auth_service:
+    build: ./auth_service
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    # environment:
+    #   - JWT_SECRET=...

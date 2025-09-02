@@ -1,35 +1,33 @@
-# Use Node.js LTS version
-FROM node:18-alpine
-
-# Set working directory
+# Stage 1: Build the TypeScript application
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production
+RUN npm install
 
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the TypeScript code into JavaScript
 RUN npm run build
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S authservice -u 1001
+# Stage 2: Create the production image
+FROM node:18-alpine
+WORKDIR /app
 
-# Change ownership of the app directory
-RUN chown -R authservice:nodejs /app
-USER authservice
+# Set environment to production
+ENV NODE_ENV=production
 
-# Expose port
+# Copy package files and install production dependencies only
+COPY package*.json ./
+RUN npm install --production
+
+# Copy the compiled JavaScript from the builder stage (assuming it's in a 'dist' folder)
+COPY --from=builder /app/dist ./dist
+
+# Expose the port the app runs on
 EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "http.get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })" || exit 1
-
-# Start the application
-CMD ["npm", "start"]
+# The command to start the application
+CMD ["node", "dist/index.js"]
