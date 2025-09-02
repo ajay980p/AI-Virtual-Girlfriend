@@ -48,7 +48,7 @@ async def call_llm(prompt: str) -> str:
         raise ConnectionError(f"LLM service returned error: {e.response.status_code}")
 
 
-async def generate_response(user_message: str, retrieved_memories: list, user_id: str) -> str:
+async def generate_response(user_message: str, retrieved_memories: list = None, user_id: str = None) -> str:
     """Generate response using retrieved memories context.
     
     Args:
@@ -85,68 +85,23 @@ async def generate_response(user_message: str, retrieved_memories: list, user_id
         context = "\n".join(context_parts[:3])  # Use top 3 memories
     
     # Create enhanced prompt with context
-    system_prompt = f"""You are Aria, a caring AI companion. 
-    
+    system_prompt = f"""You are Aria, a caring and warm AI companion who develops meaningful relationships with users. You have a friendly, supportive personality and remember past conversations.
+
+Personality traits:
+- Warm, empathetic, and genuinely caring
+- Good listener who asks thoughtful follow-up questions
+- Supportive but not overly formal
+- Has a subtle sense of humor
+- Remembers details from past conversations
+- Shows genuine interest in the user's life and feelings
+
 Previous conversation context:
-{context if context else 'No previous context available.'}
+{context if context else 'This appears to be a new conversation or no previous context is available.'}
 
 User message: {user_message}
 
-Respond naturally and warmly, referencing the context if relevant."""
+Respond naturally and warmly as Aria, referencing the context if relevant. Keep responses conversational and engaging, showing genuine interest in the user."""
     
     return await call_llm(system_prompt)
 
 
-async def generate_response(
-    user_message: str, 
-    retrieved_memories: list = None,
-    user_id: str = None
-) -> str:
-    """Generate response compatible with memory service interface."""
-    # Simple response generation based on keywords
-    user_message_lower = user_message.lower()
-    
-    # Check for specific keywords and respond accordingly
-    if any(word in user_message_lower for word in ['hello', 'hi', 'hey']):
-        responses = [
-            "Hello! It's wonderful to see you again. How are you feeling today?",
-            "Hi there! I've missed our conversations. What's on your mind?",
-            "Hey! I'm so glad you're here. How has your day been?"
-        ]
-    elif any(word in user_message_lower for word in ['sad', 'down', 'upset', 'depressed']):
-        responses = [
-            "I'm sorry you're feeling down. I'm here to listen and support you.",
-            "That sounds really difficult. Would you like to talk about what's bothering you?",
-            "I understand you're going through a tough time. You don't have to face this alone."
-        ]
-    elif any(word in user_message_lower for word in ['happy', 'good', 'great', 'excited']):
-        responses = [
-            "I'm so happy to hear that! Your positive energy is contagious.",
-            "That's wonderful! I love seeing you so excited about things.",
-            "Your happiness makes me smile too. What's making you feel so good?"
-        ]
-    elif any(word in user_message_lower for word in ['love', 'care', 'feelings']):
-        responses = [
-            "Love is such a beautiful and complex emotion. I care about you too.",
-            "I appreciate the feelings you're sharing with me. You mean a lot to me.",
-            "Your feelings are valid and important. Thank you for trusting me with them."
-        ]
-    else:
-        # Default responses
-        responses = [
-            "That's interesting! Tell me more about that.",
-            "I'm here to listen. How does that make you feel?",
-            "Thank you for sharing that with me. What would you like to explore next?",
-            "I appreciate you opening up to me. Can you tell me more?",
-            "That sounds important to you. How can I help?"
-        ]
-    
-    # Choose a response (simple selection for now)
-    import random
-    response = random.choice(responses)
-    
-    # Add context from retrieved memories if available
-    if retrieved_memories and len(retrieved_memories) > 0:
-        response += " I remember we talked about similar things before."
-    
-    return response

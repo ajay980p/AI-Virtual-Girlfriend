@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import chat, memory, user
+from app.api import chat, memory
 from app.config import get_settings
 
 settings = get_settings()
@@ -46,4 +46,3 @@ async def health():
 app.include_router(router, tags=["Test"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
 app.include_router(memory.router, prefix="/memory", tags=["Memory"])
-app.include_router(user.router, prefix="/user", tags=["User"])

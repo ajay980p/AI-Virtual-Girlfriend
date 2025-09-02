@@ -222,7 +222,7 @@ async def get_memory_stats(user_id: str) -> Dict[str, Any]:
     """
     try:
         # Get a sample of memories to analyze
-        sample_vector = [0.0] * 384  # Zero vector for broad search
+        sample_vector = [0.0] * 3072  # Zero vector for broad search
         memories = await find_similar_memory(user_id, sample_vector, top_k=100)
         
         memory_types = {}
@@ -417,7 +417,7 @@ async def validate_rag_system() -> Dict[str, bool]:
     try:
         # Test embedding service
         test_embedding = await embed_text("Test message for RAG validation")
-        validation_results["embedding_service"] = len(test_embedding) == 384
+        validation_results["embedding_service"] = len(test_embedding) == 3072
         
         # Test vector database (basic connection)
         test_user = "test_validation_user"

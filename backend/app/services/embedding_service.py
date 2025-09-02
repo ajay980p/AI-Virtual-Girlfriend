@@ -69,7 +69,7 @@ async def embed_text(text: str) -> List[float]:
         return _generate_mock_embedding(text)
 
 
-def _generate_mock_embedding(text: str, dimension: int = 384) -> List[float]:
+def _generate_mock_embedding(text: str, dimension: int = 3072) -> List[float]:
     """Generate a mock embedding for testing purposes."""
     # Generate a deterministic but randomized embedding based on text hash
     hash_value = hash(text) % (2**31 - 1)
@@ -129,10 +129,10 @@ def get_embedding_dimension() -> int:
     Returns the dimension of the embedding vectors produced by the current model.
     
     Returns:
-        int: The embedding dimension (384 for all-MiniLM-L6-v2).
+        int: The embedding dimension (3072 for all-MiniLM-L6-v2).
     """
-    # all-MiniLM-L6-v2 produces 384-dimensional embeddings
-    return 384
+    # all-MiniLM-L6-v2 produces 3072-dimensional embeddings
+    return 3072
 
 
 def get_model_info() -> dict:
@@ -144,7 +144,7 @@ def get_model_info() -> dict:
     """
     return {
         "repo_id": "sentence-transformers/all-MiniLM-L6-v2",
-        "dimension": 384,
+        "dimension": 3072,
         "provider": "HuggingFace",
         "model_type": "sentence-transformer"
     }
@@ -162,7 +162,7 @@ async def validate_embedding_service() -> bool:
         embedding = await embed_text(test_text)
         
         # Check if we got a valid embedding
-        if embedding and len(embedding) == 384:
+        if embedding and len(embedding) == 3072:
             logger.info("Embedding service validation successful")
             return True
         else:

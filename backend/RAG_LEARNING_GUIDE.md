@@ -23,7 +23,7 @@ Store in Vector DB ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← �
 ### Core Components:
 
 1. **Embedding Service** 📝
-   - Converts text to numerical vectors (384 dimensions)
+   - Converts text to numerical vectors (3072 dimensions)
    - Uses HuggingFace's `all-MiniLM-L6-v2` model
    - Enables semantic similarity search
 
@@ -52,7 +52,7 @@ Store in Vector DB ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← �
 # Input text
 "I love playing guitar"
 
-# Gets converted to a 384-dimensional vector
+# Gets converted to a 3072-dimensional vector
 [0.123, -0.456, 0.789, ..., 0.321]
 
 # Similar texts have similar vectors
@@ -70,7 +70,7 @@ Store in Vector DB ← ← ← ← ← ← ← ← ← ← ← ← ← ← ← �
 ```python
 {
     "id": "user123-456789",
-    "vector": [0.123, -0.456, ...],  # 384 dimensions
+    "vector": [0.123, -0.456, ...],  # 3072 dimensions
     "metadata": {
         "user_id": "user123",
         "text": "User said: I love playing guitar",
