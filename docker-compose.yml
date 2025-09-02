@@ -1,42 +1,43 @@
 version: '3.8'
 
 services:
-  # Frontend Next.js Service
+  # ---------------------------------
+  # Frontend Service (Next.js)
+  # ---------------------------------
   frontend:
-    build: ./frontend
+    image: yourdockerhubusername/my-frontend:latest
     ports:
       - "3000:3000"
-    env_file:
-      - ./.env 
     restart: unless-stopped
     environment:
-      # These URLs point to the other services using their service names.
-      # Docker's internal network handles the routing!
+      # These URLs allow Next.js to communicate with the other containers
+      # using their service names as hostnames. Docker's internal DNS handles this.
       - NEXT_PUBLIC_BACKEND_API_URL=http://backend:8000
       - NEXT_PUBLIC_AUTH_API_URL=http://auth_service:3001
     depends_on:
       - backend
       - auth_service
 
-  # Backend FastAPI Service
+  # ---------------------------------
+  # Backend Service (Python/FastAPI)
+  # ---------------------------------
   backend:
-    build: ./backend
+    image: yourdockerhubusername/my-backend:latest
     ports:
       - "8000:8000"
-    env_file:
-      - ./.env 
     restart: unless-stopped
-    # You can add environment variables for database connections, API keys, etc.
-    # environment:
-    #   - DATABASE_URL=...
+    env_file:
+      # Injects secrets from the .env file in the same directory
+      - ./.env
 
-  # Auth Express.js Service
+  # ---------------------------------
+  # Auth Service (Node.js/Express)
+  # ---------------------------------
   auth_service:
-    build: ./auth_service
+    image: yourdockerhubusername/my-auth-service:latest
     ports:
       - "3001:3001"
-    env_file:
-      - ./.env 
     restart: unless-stopped
-    # environment:
-    #   - JWT_SECRET=...
+    env_file:
+      # Injects secrets from the .env file in the same directory
+      - ./.env
