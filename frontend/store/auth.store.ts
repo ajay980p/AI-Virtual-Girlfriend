@@ -74,6 +74,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  token: string;
 
   // Actions
   login: (credentials: LoginRequest) => Promise<boolean>;
@@ -232,6 +233,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      token : '',
 
       // Initialize auth state from cookies
       initializeAuth: () => {

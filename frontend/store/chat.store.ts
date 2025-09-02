@@ -264,7 +264,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     try {
       // Get auth token if available
-      const authToken = authState.token;
+      const authToken = authState?.token;
       
       // Call backend AI API with auth token and conversation ID
       const response = await chatAPI.sendMessage(userId, content, threadId, authToken);
