@@ -1,5 +1,5 @@
 # Stage 1: Build the TypeScript application
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files and install dependencies
@@ -13,7 +13,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Create the production image
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /app
 
 # Set environment to production
@@ -27,7 +27,7 @@ RUN npm install --production
 COPY --from=builder /app/dist ./dist
 
 # Expose the port the app runs on
-EXPOSE 3001
+EXPOSE 4500
 
 # The command to start the application
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/server.js"]

@@ -1,32 +1,37 @@
-# Stage 1: Build the application
-FROM node:18-alpine AS builder
+# 1️⃣ Builder Stage: Install and build the app
+FROM node:20-alpine AS builder
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy only dependency files (for better Docker cache)
 COPY package*.json ./
-RUN npm install
 
-# Copy the rest of the application source code
+# Install all dependencies (including devDependencies)
+RUN npm ci
+
+# Copy the full app source code
 COPY . .
 
-# Build the Next.js application
+# Build the Next.js app (standalone output will be created)
 RUN npm run build
 
-# Stage 2: Create the production image
-FROM node:18-alpine
+# 2️⃣ Runtime Stage: Slim final image with only runtime files
+FROM node:20-alpine AS runner
+
+# Set working directory
 WORKDIR /app
 
 # Set environment to production
 ENV NODE_ENV=production
 
-# Copy built assets from the builder stage
+# Copy the standalone build and public assets
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
 
-# Expose the port the app runs on
+# (Optional) Expose port (Next.js runs on 3000 by default)
 EXPOSE 3000
 
-# The command to start the application
-CMD ["npm", "start"]
+# Run the app using the standalone server file
+CMD ["node", "server.js"]
