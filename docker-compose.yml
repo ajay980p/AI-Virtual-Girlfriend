@@ -17,6 +17,9 @@ services:
     depends_on:
       - backend
       - auth_service
+    env_file:
+      # Injects secrets from the .env file in the same directory
+      - ./.env
 
   # ---------------------------------
   # Backend Service (Python/FastAPI)
