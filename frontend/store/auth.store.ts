@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import API_CONFIG from '../lib/api-config';
 import {
   setAuthTokens,
   getAuthTokens,
@@ -98,8 +99,8 @@ class AuthService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:3001/api';
-    console.log('✅ AuthService baseURL:', this.baseURL); // <--- Add this
+    this.baseURL = API_CONFIG.AUTH_SERVICE_URL;
+    console.log('✅ AuthService baseURL:', this.baseURL);
   }
 
   private async makeRequest<T>(
