@@ -112,6 +112,8 @@ class APIClient {
     this.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
     // Auth service URL (Express.js TypeScript service)
     this.authServiceURL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:3001/api';
+
+    console.log('Auth Service URL:', this.authServiceURL);
   }
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
@@ -128,10 +130,10 @@ class APIClient {
     includeAuth: boolean = true
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     // Get auth headers if needed
     const authHeaders = includeAuth ? await this.getAuthHeaders() : {};
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -143,7 +145,7 @@ class APIClient {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         let errorDetail = 'An error occurred';
         try {
@@ -152,7 +154,7 @@ class APIClient {
         } catch {
           // Failed to parse error response
         }
-        
+
         throw new BackendAPIError(
           `HTTP ${response.status}: ${errorDetail}`,
           response.status,
@@ -166,7 +168,7 @@ class APIClient {
       if (error instanceof BackendAPIError) {
         throw error;
       }
-      
+
       // Network or other errors
       throw new BackendAPIError(
         `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -182,10 +184,10 @@ class APIClient {
     includeAuth: boolean = true
   ): Promise<T> {
     const url = `${this.authServiceURL}${endpoint}`;
-    
+
     // Get auth headers if needed
     const authHeaders = includeAuth ? await this.getAuthHeaders() : {};
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -197,7 +199,7 @@ class APIClient {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         let errorDetail = 'An error occurred';
         try {
@@ -206,7 +208,7 @@ class APIClient {
         } catch {
           // Failed to parse error response
         }
-        
+
         throw new BackendAPIError(
           `HTTP ${response.status}: ${errorDetail}`,
           response.status,
@@ -220,7 +222,7 @@ class APIClient {
       if (error instanceof BackendAPIError) {
         throw error;
       }
-      
+
       // Network or other errors
       throw new BackendAPIError(
         `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -265,7 +267,7 @@ class APIClient {
   }
 
   // Conversation API methods
-  
+
   /**
    * Get user's conversations
    */
@@ -278,7 +280,7 @@ class APIClient {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.modelId) queryParams.append('modelId', params.modelId);
-    
+
     const query = queryParams.toString();
     return this.makeAuthServiceRequest<ConversationListResponse>(
       `/conversations${query ? `?${query}` : ''}`,
@@ -369,7 +371,7 @@ class APIClient {
     queryParams.append('q', params.q);
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
-    
+
     return this.makeAuthServiceRequest<ConversationListResponse>(
       `/conversations/search?${queryParams.toString()}`,
       {},
@@ -383,19 +385,19 @@ export const apiClient = new APIClient();
 
 // Utility functions for easier usage
 export const chatAPI = {
-  sendMessage: (userId: string, message: string, conversationId?: string, authToken?: string) => 
-    apiClient.sendChatMessage({ 
-      user_id: userId, 
-      message, 
+  sendMessage: (userId: string, message: string, conversationId?: string, authToken?: string) =>
+    apiClient.sendChatMessage({
+      user_id: userId,
+      message,
       conversation_id: conversationId,
-      auth_token: authToken 
+      auth_token: authToken
     }),
-  
+
   storeMemory: (userId: string, content: string, importance?: number) =>
     apiClient.storeMemory({ user_id: userId, content, importance }),
-    
+
   healthCheck: () => apiClient.healthCheck(),
-  
+
   testConnection: () => apiClient.testConnection(),
 };
 
@@ -403,22 +405,22 @@ export const chatAPI = {
 export const conversationAPI = {
   getConversations: (params?: { page?: number; limit?: number; modelId?: string }) =>
     apiClient.getConversations(params),
-    
+
   getConversationById: (conversationId: string) =>
     apiClient.getConversationById(conversationId),
-    
+
   createConversation: (request: CreateConversationRequest) =>
     apiClient.createConversation(request),
-    
+
   addMessage: (conversationId: string, message: AddMessageRequest) =>
     apiClient.addMessageToConversation(conversationId, message),
-    
+
   updateTitle: (conversationId: string, title: string) =>
     apiClient.updateConversationTitle(conversationId, title),
-    
+
   deleteConversation: (conversationId: string) =>
     apiClient.deleteConversation(conversationId),
-    
+
   searchConversations: (params: { q: string; page?: number; limit?: number }) =>
     apiClient.searchConversations(params),
 };
