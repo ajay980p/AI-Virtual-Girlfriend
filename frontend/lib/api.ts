@@ -4,6 +4,8 @@
 
 import { ensureValidToken } from '../hooks/useTokenRefresh';
 import { getAccessToken } from '../lib/cookies';
+import { getConfig } from './env-config';
+import API_CONFIG from './api-config';
 
 export interface ChatRequest {
   user_id: string;
@@ -108,12 +110,18 @@ class APIClient {
   private authServiceURL: string;
 
   constructor() {
-    // Default to localhost:8000 for development (Python RAG service)
-    this.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
-    // Auth service URL (Express.js TypeScript service)
-    this.authServiceURL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:3001/api';
+    // Use API_CONFIG for reliable configuration
+    this.baseURL = API_CONFIG.BACKEND_URL;
+    this.authServiceURL = API_CONFIG.AUTH_SERVICE_URL;
 
+    console.log('🔧 API Client Config:');
+    console.log('Backend URL:', this.baseURL);
     console.log('Auth Service URL:', this.authServiceURL);
+    console.log('Environment check:', {
+      NODE_ENV: process.env.NODE_ENV,
+      NEXT_PUBLIC_AUTH_SERVICE_URL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL,
+      NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL
+    });
   }
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
