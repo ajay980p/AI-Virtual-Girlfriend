@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { 
-  setAuthTokens, 
-  getAuthTokens, 
-  clearAuthTokens, 
+import {
+  setAuthTokens,
+  getAuthTokens,
+  clearAuthTokens,
   getAccessToken as getCookieAccessToken,
-  getRefreshToken as getCookieRefreshToken 
+  getRefreshToken as getCookieRefreshToken
 } from '@/lib/cookies';
 
 // User interface based on the auth service
@@ -86,7 +86,7 @@ interface AuthState {
   changePassword: (data: ChangePasswordRequest) => Promise<boolean>;
   clearError: () => void;
   initializeAuth: () => void;
-  
+
   // Utility actions
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -99,6 +99,7 @@ class AuthService {
 
   constructor() {
     this.baseURL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:3001/api';
+    console.log('✅ AuthService baseURL:', this.baseURL); // <--- Add this
   }
 
   private async makeRequest<T>(
@@ -106,7 +107,7 @@ class AuthService {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -118,7 +119,7 @@ class AuthService {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         let errorMessage = 'An error occurred';
         try {
@@ -127,7 +128,7 @@ class AuthService {
         } catch {
           errorMessage = `HTTP ${response.status}`;
         }
-        
+
         throw new Error(errorMessage);
       }
 
@@ -135,7 +136,7 @@ class AuthService {
       if (!data.success) {
         throw new Error(data.message || 'Request failed');
       }
-      
+
       return data.data;
     } catch (error) {
       throw error instanceof Error ? error : new Error('Unknown error occurred');
@@ -178,7 +179,7 @@ class AuthService {
   async logout(accessToken?: string, refreshToken?: string): Promise<void> {
     const aToken = accessToken || getCookieAccessToken();
     const rToken = refreshToken || getCookieRefreshToken();
-    
+
     if (aToken) {
       await this.makeRequest<void>('/auth/logout', {
         method: 'POST',
@@ -225,7 +226,7 @@ class AuthService {
 const authService = new AuthService();
 
 // Zustand store with persistence (only user data, tokens in cookies)
-export const useAuthStore = create<AuthState>()(  
+export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       // Initial state
@@ -233,7 +234,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
-      token : '',
+      token: '',
 
       // Initialize auth state from cookies
       initializeAuth: () => {
@@ -256,20 +257,20 @@ export const useAuthStore = create<AuthState>()(
       // Actions
       login: async (credentials: LoginRequest): Promise<boolean> => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await authService.login(credentials);
-          
+
           // Store tokens in cookies
           setAuthTokens(response.tokens.accessToken, response.tokens.refreshToken);
-          
+
           set({
             user: response.user,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
-          
+
           return true;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Login failed';
@@ -285,20 +286,20 @@ export const useAuthStore = create<AuthState>()(
 
       register: async (userData: RegisterRequest): Promise<boolean> => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const response = await authService.register(userData);
-          
+
           // Store tokens in cookies
           setAuthTokens(response.tokens.accessToken, response.tokens.refreshToken);
-          
+
           set({
             user: response.user,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
-          
+
           return true;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Registration failed';
@@ -319,10 +320,10 @@ export const useAuthStore = create<AuthState>()(
           // Continue with logout even if API call fails
           console.error('Logout API error:', error);
         }
-        
+
         // Clear tokens from cookies
         clearAuthTokens();
-        
+
         set({
           user: null,
           isAuthenticated: false,
@@ -336,10 +337,10 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error('Logout all API error:', error);
         }
-        
+
         // Clear tokens from cookies
         clearAuthTokens();
-        
+
         set({
           user: null,
           isAuthenticated: false,
@@ -349,7 +350,7 @@ export const useAuthStore = create<AuthState>()(
 
       refreshToken: async (): Promise<boolean> => {
         const refreshToken = getCookieRefreshToken();
-        
+
         if (!refreshToken) {
           clearAuthTokens();
           set({
@@ -358,17 +359,17 @@ export const useAuthStore = create<AuthState>()(
           });
           return false;
         }
-        
+
         try {
           const response = await authService.refreshToken();
-          
+
           // Update tokens in cookies
           setAuthTokens(response.tokens.accessToken, response.tokens.refreshToken);
-          
+
           set({
             error: null,
           });
-          
+
           return true;
         } catch (error) {
           console.error('Token refresh failed:', error);
@@ -384,23 +385,23 @@ export const useAuthStore = create<AuthState>()(
 
       updateProfile: async (data: UpdateProfileRequest): Promise<boolean> => {
         const accessToken = getCookieAccessToken();
-        
+
         if (!accessToken) {
           set({ error: 'Not authenticated' });
           return false;
         }
-        
+
         set({ isLoading: true, error: null });
-        
+
         try {
           const updatedUser = await authService.updateProfile(data);
-          
+
           set({
             user: updatedUser,
             isLoading: false,
             error: null,
           });
-          
+
           return true;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Profile update failed';
@@ -414,17 +415,17 @@ export const useAuthStore = create<AuthState>()(
 
       changePassword: async (data: ChangePasswordRequest): Promise<boolean> => {
         const accessToken = getCookieAccessToken();
-        
+
         if (!accessToken) {
           set({ error: 'Not authenticated' });
           return false;
         }
-        
+
         set({ isLoading: true, error: null });
-        
+
         try {
           await authService.changePassword(data);
-          
+
           // Password change logs out all devices, clear tokens
           clearAuthTokens();
           set({
@@ -433,7 +434,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null,
           });
-          
+
           return true;
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Password change failed';
@@ -447,11 +448,11 @@ export const useAuthStore = create<AuthState>()(
 
       // Utility actions
       clearError: () => set({ error: null }),
-      
+
       setLoading: (loading: boolean) => set({ isLoading: loading }),
-      
+
       setError: (error: string | null) => set({ error }),
-      
+
       setUser: (user: User | null) => set({ user }),
     }),
     {
@@ -482,11 +483,11 @@ export const isTokenExpired = (token: string): boolean => {
 // Auto token refresh utility
 export const ensureValidToken = async (): Promise<string | null> => {
   const accessToken = getCookieAccessToken();
-  
+
   if (!accessToken) {
     return null;
   }
-  
+
   // Check if access token is expired or will expire in the next 5 minutes
   if (isTokenExpired(accessToken)) {
     const refreshSuccess = await useAuthStore.getState().refreshToken();
@@ -495,6 +496,6 @@ export const ensureValidToken = async (): Promise<string | null> => {
     }
     return getCookieAccessToken();
   }
-  
+
   return accessToken;
 };
