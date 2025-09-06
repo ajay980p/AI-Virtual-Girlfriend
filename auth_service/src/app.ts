@@ -11,11 +11,7 @@ import config from './config';
 import swaggerSpecs from './config/swagger';
 import connectDB from './config/database';
 import routes from './routes';
-import {
-  generalRateLimit,
-  errorHandler,
-  notFoundHandler
-} from './middleware';
+import { generalRateLimit, errorHandler, notFoundHandler } from './middleware';
 
 class App {
   public app: Application;

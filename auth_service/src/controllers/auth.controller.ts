@@ -3,10 +3,10 @@ import { User } from '../models';
 import { JWTUtil } from '../utils/jwt';
 import { AppError, asyncHandler } from '../middleware/error.middleware';
 import { AuthenticatedRequest } from '../types/express.types';
-import { 
-  IUserInput, 
-  ILoginCredentials, 
-  IAuthResponse, 
+import {
+  IUserInput,
+  ILoginCredentials,
+  IAuthResponse,
   IUserResponse,
   IPasswordResetRequest,
   IPasswordReset,

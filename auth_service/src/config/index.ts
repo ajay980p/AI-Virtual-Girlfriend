@@ -1,7 +1,10 @@
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Load environment variables
-dotenv.config();
+// Ensure we load the .env from the auth_service root even when CWD is monorepo root
+const envPath = path.resolve(__dirname, '../../.env');
+dotenv.config({ path: envPath });
 
 interface Config {
   app: {
@@ -36,6 +39,25 @@ interface Config {
   api: {
     docsEnabled: boolean;
   };
+}
+
+// Small helper to mask credentials in URIs for safe logging
+const maskMongoUri = (uri?: string): string => {
+  if (!uri) return '';
+  try {
+    return uri.replace(/\/\/.*?@/, '//<credentials>@');
+  } catch {
+    return uri;
+  }
+};
+
+// Debug: show where env loaded from and what DB URI is picked in dev
+if (process.env.NODE_ENV !== 'production') {
+  // Only for local debugging; avoids leaking secrets
+  // eslint-disable-next-line no-console
+  console.log(`ENV loaded from: ${envPath}`);
+  // eslint-disable-next-line no-console
+  console.log(`MONGODB_URI (effective): ${maskMongoUri(process.env.MONGODB_URI) || '<not set>'}`);
 }
 
 const config: Config = {
