@@ -112,16 +112,7 @@ class APIClient {
   constructor() {
     // Use API_CONFIG for reliable configuration
     this.baseURL = API_CONFIG.BACKEND_URL;
-    this.authServiceURL = API_CONFIG.AUTH_SERVICE_URL;
-
-    console.log('🔧 API Client Config:');
-    console.log('Backend URL:', this.baseURL);
-    console.log('Auth Service URL:', this.authServiceURL);
-    console.log('Environment check:', {
-      NODE_ENV: process.env.NODE_ENV,
-      NEXT_PUBLIC_AUTH_SERVICE_URL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL,
-      NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL
-    });
+    this.authServiceURL = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:3001/api';
   }
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
