@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
@@ -11,10 +11,10 @@ import config from './config';
 import swaggerSpecs from './config/swagger';
 import connectDB from './config/database';
 import routes from './routes';
-import { 
-  generalRateLimit, 
-  errorHandler, 
-  notFoundHandler 
+import {
+  generalRateLimit,
+  errorHandler,
+  notFoundHandler
 } from './middleware';
 
 class App {
@@ -47,13 +47,14 @@ class App {
       },
     }));
 
-    // CORS configuration
-    this.app.use(cors({
-      origin: config.cors.origin,
+    const allowedOrigins: string[] = config.cors.origin || [];
+    const corsOptions: CorsOptions = {
+      origin: allowedOrigins,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
-    }));
+    };
+    this.app.use(cors(corsOptions));
 
     // Compression middleware
     this.app.use(compression());
@@ -137,7 +138,7 @@ class App {
       };
 
       this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, swaggerOptions));
-      
+
       // Serve swagger JSON
       this.app.get('/api-docs.json', (req, res) => {
         res.setHeader('Content-Type', 'application/json');
@@ -161,11 +162,11 @@ class App {
       console.log(`🚀 Auth service running on port ${config.app.port}`);
       console.log(`🌍 Environment: ${config.app.env}`);
       console.log(`💾 Database: ${config.database.uri.replace(/\/\/.*@/, '//<credentials>@')}`);
-      
+
       if (config.api.docsEnabled) {
         console.log(`📚 API Documentation: http://localhost:${config.app.port}/api-docs`);
       }
-      
+
       console.log(`❤️ Health Check: http://localhost:${config.app.port}/health`);
     });
   }

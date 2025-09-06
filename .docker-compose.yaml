@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  frontend:
+    platform: linux/arm64  # ✅ Add this line
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: ajay980p/ai_virtual_girlfriend:frontend
+    environment:
+      NEXT_PUBLIC_AUTH_SERVICE_URL: ${NEXT_PUBLIC_AUTH_SERVICE_URL}
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL}
+    ports:
+      - "3000:3000"

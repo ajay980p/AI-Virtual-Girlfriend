@@ -21,7 +21,7 @@ interface Config {
     bcryptSaltRounds: number;
   };
   cors: {
-    origin: string;
+    origin: string[];
   };
   rateLimit: {
     windowMs: number;
@@ -56,7 +56,9 @@ const config: Config = {
     bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10),
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean)
+      : ['http://localhost:3000'],
   },
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
@@ -81,9 +83,9 @@ if (config.app.env === 'production') {
     'MONGODB_URI',
     'COOKIE_SECRET',
   ];
-  
+
   const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-  
+
   if (missingEnvVars.length > 0) {
     throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
   }

@@ -1,37 +1,34 @@
-# 1️⃣ Builder Stage: Install and build the app
+# --- Step 1: Builder image ---
 FROM node:20-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy only dependency files (for better Docker cache)
-COPY package*.json ./
+# Install dependencies
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
-# Install all dependencies (including devDependencies)
-RUN npm ci
-
-# Copy the full app source code
+# Copy all files
 COPY . .
 
-# Build the Next.js app (standalone output will be created)
-RUN npm run build
+# Build the Next.js app (build-time env from Doppler will go here)
+RUN yarn build
 
-# 2️⃣ Runtime Stage: Slim final image with only runtime files
+# --- Step 2: Runtime image ---
 FROM node:20-alpine AS runner
 
-# Set working directory
 WORKDIR /app
 
-# Set environment to production
-ENV NODE_ENV=production
-
-# Copy the standalone build and public assets
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+# Copy build from builder
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/yarn.lock ./
 
-# (Optional) Expose port (Next.js runs on 3000 by default)
+# Install only prod deps
+RUN yarn install --frozen-lockfile --production
+
 EXPOSE 3000
 
-# Run the app using the standalone server file
-CMD ["node", "server.js"]
+ENV NODE_ENV=production
+
+CMD ["yarn", "start"]
