@@ -8,7 +8,7 @@ export const API_CONFIG = {
     BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000',
 
     // Auth Service URL (Express.js TypeScript service)  
-    AUTH_SERVICE_URL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://168.138.112.73:4500/api',
+    AUTH_SERVICE_URL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL,
 };
 
 // For server deployment, you can override these values directly:
