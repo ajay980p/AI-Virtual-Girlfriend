@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Dict, Any
 from app.api import chat, memory
 from app.config import get_settings
 
@@ -21,15 +22,15 @@ app.add_middleware(
 )
 
 @router.get("/")
-def test():
+def test() -> Dict[str, str]:
     return {"msg": "This is the root endpoint!"}
 
 @router.get("/ping")
-def ping():
+def ping() -> Dict[str, str]:
     return {"status": "ok"}
 
 @router.get("/health")
-async def health():
+async def health() -> Dict[str, Any]:
     from app.services.auth_client import get_auth_client
     auth_client = get_auth_client()
     
