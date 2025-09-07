@@ -3,15 +3,6 @@ import { authMiddleware } from '../middlewares/auth';
 import ConversationModel from '../models/Conversation.model';
 import MessageModel from '../models/Message.model';
 
-// Extend Request interface for this file
-interface AuthenticatedRequest extends Request {
-    user?: {
-        id: string;
-        email?: string;
-        roles?: string[];
-    };
-}
-
 const router = Router();
 
 /**
@@ -51,7 +42,7 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/conversations', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/conversations', authMiddleware, async (req, res: Response) => {
     const userId = req.user!.id;
     const conversations = await ConversationModel.find({ userId }).sort({ updatedAt: -1 });
     res.json({ success: true, data: conversations });
@@ -108,7 +99,7 @@ router.get('/conversations', authMiddleware, async (req: AuthenticatedRequest, r
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/conversations', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/conversations', authMiddleware, async (req, res: Response) => {
     const userId = req.user!.id;
     const { title, agent = 'aria' } = req.body;
 
@@ -182,7 +173,7 @@ router.post('/conversations', authMiddleware, async (req: AuthenticatedRequest, 
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/conversations/:id/messages', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.get('/conversations/:id/messages', authMiddleware, async (req, res: Response) => {
     const userId = req.user!.id;
     const { id } = req.params;
     const { cursor, limit = 30 } = req.query;
@@ -275,7 +266,7 @@ router.get('/conversations/:id/messages', authMiddleware, async (req: Authentica
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/conversations/:id/messages', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/conversations/:id/messages', authMiddleware, async (req, res: Response) => {
     const userId = req.user!.id;
     const { id } = req.params;
     const { role, content, clientMessageId, attachments } = req.body;

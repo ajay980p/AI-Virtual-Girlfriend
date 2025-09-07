@@ -172,7 +172,7 @@ const specs = swaggerJsdoc(options);
 
 export const setupSwagger = (app: Express): void => {
     // Swagger UI setup
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs, {
         explorer: true,
         customCss: '.swagger-ui .topbar { display: none }',
         customSiteTitle: 'Chat Service API Documentation',
