@@ -20,8 +20,7 @@ from app.services.pinecone_service import store_memory, query_memories, find_sim
 print("✅ Using services with mock fallbacks for testing")
 
 import logging
-from typing import List, Dict, Any
-from datetime import datetime
+from typing import List, Dict, Any, Optional
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -311,7 +310,7 @@ async def store_conversation_memory(user_id: str, user_message: str, ai_response
 
 
 
-async def store_multiple_memories(user_id: str, memory_texts: list[str], memory_types: list[str] = None):
+async def store_multiple_memories(user_id: str, memory_texts: list[str], memory_types: Optional[list[str]] = None):
     """
     📦 Store multiple memories efficiently using batch embedding.
     
