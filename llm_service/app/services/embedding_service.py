@@ -68,6 +68,10 @@ async def embed_text(text: str) -> List[float]:
         return _generate_mock_embedding(text)
 
 
+
+
+
+
 def _generate_mock_embedding(text: str, dimension: int = 3072) -> List[float]:
     """Generate a mock embedding for testing purposes."""
     # Generate a deterministic but randomized embedding based on text hash
