@@ -25,10 +25,6 @@ app.add_middleware(
 def test() -> Dict[str, str]:
     return {"msg": "This is the root endpoint!"}
 
-@router.get("/ping")
-def ping() -> Dict[str, str]:
-    return {"status": "ok"}
-
 @router.get("/health")
 async def health() -> Dict[str, Any]:
     from app.services.auth_client import get_auth_client

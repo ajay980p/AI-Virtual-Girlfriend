@@ -1,8 +1,4 @@
-import os
-from typing import List
-import requests
-import asyncio
-import aiohttp
+from typing import List, Dict, Any, Optional
 import logging
 import numpy as np
 from dotenv import load_dotenv
@@ -14,15 +10,18 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # Try to import LangChain, but fall back to mock if not available
+embeddings_client: Optional[Any] = None
+use_real_embeddings = False
+
 try:
     from langchain_google_genai import GoogleGenerativeAIEmbeddings
     # Initialize the LangChain client ONCE
     embeddings_client = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
-    USE_REAL_EMBEDDINGS = True
+    use_real_embeddings = True
 except Exception as e:
     logger.warning(f"LangChain not available, using mock embeddings: {e}")
     embeddings_client = None
-    USE_REAL_EMBEDDINGS = False
+    use_real_embeddings = False
 
 async def embed_text(text: str) -> List[float]:
     """
@@ -42,7 +41,7 @@ async def embed_text(text: str) -> List[float]:
         raise ValueError("Input text cannot be empty.")
 
     # Use mock embeddings if real client is not available
-    if not USE_REAL_EMBEDDINGS or embeddings_client is None:
+    if not use_real_embeddings or embeddings_client is None:
         return _generate_mock_embedding(text)
 
     try:
@@ -110,7 +109,7 @@ async def embed_texts_batch(texts: List[str]) -> List[List[float]]:
             raise ValueError(f"Text at index {i} cannot be empty.")
     
     # For now, process texts one by one (can be optimized later)
-    embeddings = []
+    embeddings: List[List[float]] = []
     for text in texts:
         embedding = await embed_text(text)
         embeddings.append(embedding)
@@ -135,7 +134,7 @@ def get_embedding_dimension() -> int:
     return 3072
 
 
-def get_model_info() -> dict:
+def get_model_info() -> Dict[str, Any]:
     """
     Returns information about the current embedding model.
     
