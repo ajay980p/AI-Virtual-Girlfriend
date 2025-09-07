@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
-import app from './src/app';
+import app from './app';
 
 // Additional middleware for server
 app.use(cookieParser());

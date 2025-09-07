@@ -1,23 +1,114 @@
-import { Router } from 'express';
-import { authMiddleware } from '../middlewares/auth.js';
-import ConversationModel from '../models/Conversation.model.js';
-import MessageModel from '../models/Message.model.js';
+import { Router, Request, Response } from 'express';
+import { authMiddleware } from '../middlewares/auth';
+import ConversationModel from '../models/Conversation.model';
+import MessageModel from '../models/Message.model';
+
+// Extend Request interface for this file
+interface AuthenticatedRequest extends Request {
+    user?: {
+        id: string;
+        email?: string;
+        roles?: string[];
+    };
+}
 
 const router = Router();
 
 /**
- * GET all conversations for the logged-in user
+ * @swagger
+ * /api/conversations:
+ *   get:
+ *     summary: Get all conversations for the authenticated user
+ *     tags: [Conversations]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of conversations retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Conversation'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
-router.get('/conversations', authMiddleware, async (req, res) => {
+router.get('/conversations', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const conversations = await ConversationModel.find({ userId }).sort({ updatedAt: -1 });
     res.json({ success: true, data: conversations });
 });
 
 /**
- * POST create a new conversation
+ * @swagger
+ * /api/conversations:
+ *   post:
+ *     summary: Create a new conversation
+ *     tags: [Conversations]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Conversation title
+ *                 example: "Chat with Aria"
+ *               agent:
+ *                 type: string
+ *                 description: AI agent name
+ *                 default: "aria"
+ *                 example: "aria"
+ *     responses:
+ *       201:
+ *         description: Conversation created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Conversation'
+ *       400:
+ *         description: Bad request - Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
-router.post('/conversations', authMiddleware, async (req, res) => {
+router.post('/conversations', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const { title, agent = 'aria' } = req.body;
 
@@ -31,9 +122,67 @@ router.post('/conversations', authMiddleware, async (req, res) => {
 });
 
 /**
- * GET messages in a conversation (with pagination)
+ * @swagger
+ * /api/conversations/{id}/messages:
+ *   get:
+ *     summary: Get messages in a conversation with pagination
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Conversation ID
+ *       - in: query
+ *         name: cursor
+ *         schema:
+ *           type: string
+ *         description: Pagination cursor (timestamp)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 30
+ *         description: Number of messages to retrieve
+ *     responses:
+ *       200:
+ *         description: Messages retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Message'
+ *                 nextCursor:
+ *                   type: string
+ *                   nullable: true
+ *                   description: Cursor for next page of results
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Conversation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
-router.get('/conversations/:id/messages', authMiddleware, async (req, res) => {
+router.get('/conversations/:id/messages', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const { id } = req.params;
     const { cursor, limit = 30 } = req.query;
@@ -52,9 +201,81 @@ router.get('/conversations/:id/messages', authMiddleware, async (req, res) => {
 });
 
 /**
- * POST add a message to a conversation
+ * @swagger
+ * /api/conversations/{id}/messages:
+ *   post:
+ *     summary: Add a message to a conversation
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Conversation ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - role
+ *               - content
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [user, ai, system]
+ *                 description: Message sender role
+ *                 example: "user"
+ *               content:
+ *                 type: string
+ *                 description: Message content
+ *                 example: "Hello, how are you today?"
+ *               clientMessageId:
+ *                 type: string
+ *                 description: Client-side message ID for deduplication
+ *               attachments:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                 description: Message attachments
+ *     responses:
+ *       201:
+ *         description: Message created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Message'
+ *       400:
+ *         description: Bad request - Missing role or content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Conversation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
-router.post('/conversations/:id/messages', authMiddleware, async (req, res) => {
+router.post('/conversations/:id/messages', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.user!.id;
     const { id } = req.params;
     const { role, content, clientMessageId, attachments } = req.body;
@@ -82,7 +303,61 @@ router.post('/conversations/:id/messages', authMiddleware, async (req, res) => {
 });
 
 /**
- * PATCH update a conversation (e.g., rename, archive)
+ * @swagger
+ * /api/conversations/{id}:
+ *   patch:
+ *     summary: Update a conversation (rename, archive, etc.)
+ *     tags: [Conversations]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Conversation ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: New conversation title
+ *                 example: "Updated Chat Title"
+ *               isArchived:
+ *                 type: boolean
+ *                 description: Archive status
+ *                 example: false
+ *     responses:
+ *       200:
+ *         description: Conversation updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Conversation'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Conversation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.patch('/conversations/:id', authMiddleware, async (req, res) => {
     const userId = req.user!.id;
@@ -103,7 +378,47 @@ router.patch('/conversations/:id', authMiddleware, async (req, res) => {
 });
 
 /**
- * DELETE a conversation (and its messages)
+ * @swagger
+ * /api/conversations/{id}:
+ *   delete:
+ *     summary: Delete a conversation and all its messages
+ *     tags: [Conversations]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Conversation ID
+ *     responses:
+ *       200:
+ *         description: Conversation deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Conversation and messages deleted"
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Conversation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.delete('/conversations/:id', authMiddleware, async (req, res) => {
     const userId = req.user!.id;
@@ -120,7 +435,25 @@ router.delete('/conversations/:id', authMiddleware, async (req, res) => {
 });
 
 /**
- * Public health check
+ * @swagger
+ * /api/public-info:
+ *   get:
+ *     summary: Public health check endpoint
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Service health status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Chat service is healthy"
  */
 router.get('/public-info', (_req, res) => {
     res.json({ success: true, message: 'Chat service is healthy' });
