@@ -7,6 +7,7 @@ import { attachAuth } from './middleware/auth';
 import { router as chatRouter } from './routes/chat.routes';
 import { router as memoryRouter } from './routes/memory.routes';
 import { healthHandler, rootHandler } from './controllers/system.controller';
+import { setupSwagger } from './config/swagger';
 
 const app = express();
 
@@ -29,5 +30,8 @@ app.get('/health', healthHandler);
 // API routes
 app.use('/chat', chatRouter);
 app.use('/memory', memoryRouter);
+
+// Swagger docs
+setupSwagger(app);
 
 export default app;
