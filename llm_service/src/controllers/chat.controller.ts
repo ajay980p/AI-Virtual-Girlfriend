@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ChatRequest, ChatResponse } from '../types/chat';
-import { generateChatResponse } from '../services/memory.service.js';
+import { generateChatResponse } from '../services/memory.service';
 import { getAuthClient } from '../services/auth.service';
 
 export async function respondToUser(req: Request<unknown, unknown, ChatRequest>, res: Response<ChatResponse | { message: string }>) {

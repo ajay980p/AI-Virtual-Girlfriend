@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import { config } from './config';
 import { attachAuth } from './middleware/auth';
 import { router as chatRouter } from './routes/chat.routes';
-import { router as memoryRouter } from './routes/memory.routes.js';
+import { router as memoryRouter } from './routes/memory.routes';
 import { healthHandler, rootHandler } from './controllers/system.controller';
 
 const app = express();

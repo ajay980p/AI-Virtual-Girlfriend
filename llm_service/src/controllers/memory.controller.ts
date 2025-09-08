@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { MemoryRequest } from '../types/memory.js';
-import { embedText } from '../services/embedding.service.js';
-import { storeMemory } from '../services/pinecone.service.js';
+import { MemoryRequest } from '../types/memory';
+import { embedText } from '../services/embedding.service';
+import { storeMemory } from '../services/pinecone.service';
 
 export function ping(_req: Request, res: Response) {
     res.json({ msg: 'pong' });
