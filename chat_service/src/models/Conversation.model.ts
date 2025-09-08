@@ -1,14 +1,41 @@
+// src/models/Conversation.model.ts
 import { Schema, model, Types } from 'mongoose';
 
 const ConversationSchema = new Schema({
-    userId: { type: Types.ObjectId, ref: 'User', index: true, required: true },
-    title: { type: String, default: 'Chat with Aria' },
-    isArchived: { type: Boolean, default: false },
-    lastMessageAt: { type: Date, index: true },
-    lastMessagePreview: { type: String },
-    agent: { type: String, default: 'aria' },
+    userId: {
+        type: Types.ObjectId,
+        ref: 'User',
+        index: true,
+        required: true
+    },
+
+    agentId: {
+        type: Types.ObjectId,
+        ref: 'Agent', // ✅ You should add the reference here
+        required: true
+    },
+
+    title: {
+        type: String,
+        default: 'Chat'
+    },
+
+    isArchived: {
+        type: Boolean,
+        default: false
+    },
+
+    lastMessageAt: {
+        type: Date,
+        index: true
+    },
+
+    lastMessagePreview: {
+        type: String
+    }
+
 }, { timestamps: true });
 
-ConversationSchema.index({ userId: 1, agent: 1 }, { unique: true });
+ConversationSchema.index({ userId: 1, agentId: 1 }); // ✅ Fix typo: "agent" → "agentId"
 
 export default model('Conversation', ConversationSchema);
