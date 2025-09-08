@@ -4,20 +4,11 @@
  */
 
 export const API_CONFIG = {
-    // Backend API URL (Python RAG service)
-    BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000',
+  // Backend API URL (Python RAG service)
+  BACKEND_URL: process.env.NEXT_PUBLIC_LLM_SERVICE_URL || 'http://localhost:8000',
 
-    // Auth Service URL (Express.js TypeScript service)  
-    AUTH_SERVICE_URL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:3001/api',
+  // Auth Service URL (Express.js TypeScript service)  
+  AUTH_SERVICE_URL: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:3001/api',
 };
-
-// For server deployment, you can override these values directly:
-// Uncomment and modify the lines below for your server configuration
-/*
-export const API_CONFIG = {
-  BACKEND_URL: 'http://localhost:8000',
-  AUTH_SERVICE_URL: 'http://168.138.112.73:4500/api',
-};
-*/
 
 export default API_CONFIG;

@@ -146,6 +146,7 @@ build/
 *.swp
 *.swo
 *~
+.history/
 
 # OS generated files
 .DS_Store
