@@ -24,10 +24,10 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
-  
+
   // Load chat history automatically when user logs in
   const { isLoadingHistory } = useChatHistory();
-  
+
   // Use the chat store for proper backend integration
   const activeThreadId = useChatStore((s) => s.activeThreadId);
   const messages = useChatStore((s) => activeThreadId ? s.messagesByThread[activeThreadId] || [] : []);
@@ -57,12 +57,12 @@ export default function ChatPage() {
     if (!newMessage.trim() || !activeThreadId || isLoading) {
       return;
     }
-    
+
     // Clear any previous errors
     if (error) {
       clearError();
     }
-    
+
     try {
       // Send message through the chat store (which handles backend integration)
       await sendMessage(activeThreadId, { content: newMessage, vibe });
@@ -99,7 +99,7 @@ export default function ChatPage() {
           </div>
         </div>
       )}
-      
+
       {/* Error Message */}
       {error && (
         <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
@@ -117,7 +117,7 @@ export default function ChatPage() {
           </div>
         </div>
       )}
-      
+
       {/* Connection Status */}
       {!activeThreadId && (
         <div className="mx-6 mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20">
@@ -126,7 +126,7 @@ export default function ChatPage() {
           </p>
         </div>
       )}
-      
+
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.map((message) => (
@@ -139,17 +139,16 @@ export default function ChatPage() {
                 <span className="text-muted-foreground text-sm">Aria</span>
               </div>
             )}
-            
+
             <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-sm lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl ${
-                message.role === 'user' 
-                  ? 'bg-primary text-white' 
+              <div className={`max-w-sm lg:max-w-md xl:max-w-lg px-4 py-3 rounded-2xl ${message.role === 'user'
+                  ? 'bg-primary text-white'
                   : 'bg-card text-card-foreground'
-              }`}>
+                }`}>
                 <p className="text-sm leading-relaxed">{message.content}</p>
               </div>
             </div>
-            
+
             <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <span className="text-xs text-muted-foreground">
                 {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -157,7 +156,7 @@ export default function ChatPage() {
             </div>
           </div>
         ))}
-        
+
         {/* Typing Indicator */}
         {typing && (
           <div className="space-y-2">
@@ -182,19 +181,19 @@ export default function ChatPage() {
           </div>
         )}
       </div>
-      
+
       {/* Message Input Area */}
       <div className="border-t border-border p-6">
         <div className="flex items-center gap-3 relative">
           {/* Emoji button */}
           <div className="relative" ref={emojiPickerRef}>
-            <button 
+            <button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               className="p-3 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               <Smile className="h-5 w-5" />
             </button>
-            
+
             {/* Emoji Picker */}
             {showEmojiPicker && (
               <div className="absolute bottom-full left-0 mb-2 bg-card border border-border rounded-lg p-4 shadow-lg z-10 w-80">
@@ -212,7 +211,7 @@ export default function ChatPage() {
               </div>
             )}
           </div>
-          
+
           {/* Message input */}
           <div className="flex-1 relative">
             <textarea
@@ -224,7 +223,7 @@ export default function ChatPage() {
               rows={1}
             />
           </div>
-          
+
           {/* Mic button - disabled with tooltip */}
           <div className="relative group">
             <button
@@ -238,16 +237,15 @@ export default function ChatPage() {
               Coming Soon
             </div>
           </div>
-          
+
           {/* Send button */}
           <button
             onClick={handleSendMessage}
             disabled={!newMessage.trim() || !activeThreadId || isLoading}
-            className={`p-3 rounded-xl transition-all duration-200 cursor-pointer ${
-              newMessage.trim() && activeThreadId && !isLoading
+            className={`p-3 rounded-xl transition-all duration-200 cursor-pointer ${newMessage.trim() && activeThreadId && !isLoading
                 ? 'bg-primary text-white hover:bg-primary/90 hover:scale-105'
                 : 'bg-muted text-muted-foreground cursor-not-allowed'
-            }`}
+              }`}
           >
             {isLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
