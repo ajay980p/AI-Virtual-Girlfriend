@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import { setupSwagger } from './config/swagger';
-import routes from './routes';
+import mainRouter from './routes';
 
 dotenv.config();
 
@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 setupSwagger(app);
 
 // API routes
-app.use(routes);
+app.use('/api', mainRouter);
 
 // Health check endpoint
 app.get('/', (_req, res) => {
