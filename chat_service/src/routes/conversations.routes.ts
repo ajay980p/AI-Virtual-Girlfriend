@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middlewares/auth';
-import ConversationModel from '../models/Conversation.model.js';
-import AgentModel from '../models/Agent.model.js';
-import MessageModel from '../models/Message.model.js';
+import ConversationModel from '../models/Conversation.model';
+import AgentModel from '../models/Agent.model';
+import MessageModel from '../models/Message.model';
 import mongoose from 'mongoose';
 
 const router = Router();
