@@ -22,6 +22,8 @@ export const config = {
     authServiceApiUrl: process.env.AUTH_SERVICE_API_URL || 'http://localhost:3001/api',
     jwtSecret: process.env.JWT_SECRET || process.env.AUTH_JWT_SECRET || '',
 
+    mongodbUri: process.env.MONGODB_URI || '',
+
     pineconeApiKey: process.env.PINECONE_API_KEY || '',
     pineconeIndex: process.env.PINECONE_INDEX || process.env.PINECONE_INDEX_NAME || '',
 

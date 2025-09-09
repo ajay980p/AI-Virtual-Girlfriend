@@ -3,6 +3,7 @@ import cors, { CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import { config } from './config';
+import { connectDB } from './config/database';
 import { setupSwagger } from './config/swagger';
 import { router } from "./routes/index"
 import dotenv from 'dotenv';
@@ -10,6 +11,9 @@ import { authMiddleware } from './middleware/auth.middleware';
 dotenv.config(); // MUST come before importing config
 
 const app = express();
+
+// Initialize database connection
+connectDB().catch(console.error);
 
 // Core middleware
 const allowedOrigins: string[] = config.corsOrigins || [];
