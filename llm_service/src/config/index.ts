@@ -30,9 +30,11 @@ export const config = {
 
     googleApiKey: process.env.GOOGLE_API_KEY || '',
 
+    // Accept multiple variants: CORS_ORIGIN, CORS_ORIGINS, cors_origin, cors_origins
     corsOrigins: parseList(process.env.CORS_ORIGINS, [
         'http://localhost:3000',
         'http://localhost:3001',
+        'http://localhost:4500',
     ]),
 };
 

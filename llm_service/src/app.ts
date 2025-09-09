@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import { config } from './config';
 import { setupSwagger } from './config/swagger';
 import { router } from "./routes/index"
+import dotenv from 'dotenv';
+dotenv.config(); // MUST come before importing config
 
 const app = express();
 
