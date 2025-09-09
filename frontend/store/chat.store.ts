@@ -78,45 +78,45 @@ export const useChatStore = create<ChatState>((set, get) => ({
       userId: authState.user?._id,
       userEmail: authState.user?.email
     });
-    
+
     if (!authState.user?._id) {
       console.log('User not authenticated, skipping conversation load');
       return;
     }
 
     set({ isLoadingHistory: true, error: null });
-    
+
     try {
       console.log('loadUserConversations: Making API call to conversationAPI.getConversations');
       const response = await conversationAPI.getConversations({ limit: 50 });
       console.log('loadUserConversations: API response', response);
-      
+
       if (response.success && response.data.conversations.length > 0) {
         const threads = response.data.conversations.map(convertConversationToThread);
         const messagesByThread: MessagesByThread = {};
-        
+
         // Convert conversations to threads and messages
         response.data.conversations.forEach(conversation => {
           const messages = conversation.messages.map(convertBackendMessage);
           messagesByThread[conversation.id] = messages;
         });
-        
+
         console.log('loadUserConversations: Converted data', {
           threadCount: threads.length,
           messageThreadKeys: Object.keys(messagesByThread)
         });
-        
+
         // Keep seed thread if no conversations exist
         const allThreads = threads.length > 0 ? threads : [seedThread];
         const allMessagesByThread = threads.length > 0 ? messagesByThread : { [seedThread.id]: seedMessages };
-        
+
         set({
           threads: allThreads,
           messagesByThread: allMessagesByThread,
           activeThreadId: allThreads[0].id,
           userId: authState.user._id
         });
-        
+
         console.log('loadUserConversations: State updated successfully');
       } else {
         console.log('loadUserConversations: No conversations found, keeping seed data');
@@ -125,7 +125,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
     } catch (error) {
       console.error('Failed to load conversations:', error);
-      set({ 
+      set({
         error: error instanceof BackendAPIError ? error.detail : 'Failed to load chat history'
       });
       // Keep seed data on error
@@ -137,20 +137,35 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   loadConversationById: async (conversationId: string) => {
     const authState = useAuthStore.getState();
-    if (!authState.user?._id) return;
+    console.log('loadConversationById: Starting for', conversationId, {
+      isAuthenticated: !!authState.user?._id
+    });
+
+    if (!authState.user?._id) {
+      console.log('loadConversationById: User not authenticated');
+      return;
+    }
 
     set({ isLoading: true, error: null });
-    
+
     try {
+      console.log('loadConversationById: Making API call');
       const response = await conversationAPI.getConversationById(conversationId);
-      
+      console.log('loadConversationById: API response', response);
+
       if (response.success) {
         const conversation = response.data.conversation;
         const thread = convertConversationToThread(conversation);
         const messages = conversation.messages.map(convertBackendMessage);
-        
+
+        console.log('loadConversationById: Converted data', {
+          threadId: thread.id,
+          messageCount: messages.length,
+          messages: messages.map(m => ({ id: m.id, role: m.role, content: m.content.substring(0, 50) }))
+        });
+
         set(state => ({
-          threads: state.threads.some(t => t.id === thread.id) 
+          threads: state.threads.some(t => t.id === thread.id)
             ? state.threads.map(t => t.id === thread.id ? thread : t)
             : [thread, ...state.threads],
           messagesByThread: {
@@ -159,10 +174,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
           },
           activeThreadId: conversationId
         }));
+
+        console.log('loadConversationById: State updated successfully');
       }
     } catch (error) {
       console.error('Failed to load conversation:', error);
-      set({ 
+      set({
         error: error instanceof BackendAPIError ? error.detail : 'Failed to load conversation'
       });
     } finally {
@@ -172,7 +189,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   createThread: async (modelId?: string) => {
     const authState = useAuthStore.getState();
-    
+
     if (!authState.user?._id) {
       // For unauthenticated users, create local thread
       const id = nanoid();
@@ -191,18 +208,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     set({ isLoading: true, error: null });
-    
+
     try {
       const response = await conversationAPI.createConversation({
         title: "New chat",
         modelId,
       });
-      
+
       if (response.success) {
         const conversation = response.data.conversation;
         const thread = convertConversationToThread(conversation);
         const messages = conversation.messages.map(convertBackendMessage);
-        
+
         set((s) => ({
           threads: [thread, ...s.threads],
           messagesByThread: { ...s.messagesByThread, [thread.id]: messages },
@@ -211,10 +228,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
     } catch (error) {
       console.error('Failed to create conversation:', error);
-      set({ 
+      set({
         error: error instanceof BackendAPIError ? error.detail : 'Failed to create new conversation'
       });
-      
+
       // Fallback to local thread creation
       const id = nanoid();
       const t: Thread = {
@@ -233,21 +250,32 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  selectThread: (id) => set({ activeThreadId: id }),
+  selectThread: (id) => {
+    const state = get();
+    // If the thread doesn't exist in our local store, try to load it
+    if (!state.threads.find(t => t.id === id)) {
+      const authState = useAuthStore.getState();
+      if (authState.user?._id) {
+        // Load the conversation from the backend
+        get().loadConversationById(id);
+      }
+    }
+    set({ activeThreadId: id });
+  },
 
   sendMessage: async (threadId, { content, vibe }) => {
     const authState = useAuthStore.getState();
     const userId = authState.user?._id || 'anonymous';
     const ui = useUIStore.getState();
-    
+
     // Update userId in chat store if authenticated
     if (authState.user?._id && get().userId !== authState.user._id) {
       set({ userId: authState.user._id });
     }
-    
+
     // Clear any previous errors
     set({ error: null });
-    
+
     // Add user message immediately
     const userMsg: Message = { id: nanoid(), role: "user", content, createdAt: Date.now() };
     set((s) => {
@@ -265,18 +293,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       // Get auth token if available
       const authToken = authState?.token;
-      
+
       // Call backend AI API with auth token and conversation ID
       const response = await chatAPI.sendMessage(userId, content, threadId, authToken);
-      
+
       // Add assistant response
-      const assistantMsg: Message = { 
-        id: nanoid(), 
-        role: "assistant", 
-        content: response.response, 
-        createdAt: Date.now() 
+      const assistantMsg: Message = {
+        id: nanoid(),
+        role: "assistant",
+        content: response.response,
+        createdAt: Date.now()
       };
-      
+
       set((s) => {
         const msgs = (s.messagesByThread[threadId] || []).concat(assistantMsg);
         const threads = s.threads.map((t) =>
@@ -284,20 +312,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
         );
         return { messagesByThread: { ...s.messagesByThread, [threadId]: msgs }, threads };
       });
-      
+
       // If we got a conversation_id back from the backend, update the thread
       if (response.conversation_id && response.conversation_id !== threadId) {
         // Update the thread ID to match the backend conversation ID
         set((s) => {
           const oldThread = s.threads.find(t => t.id === threadId);
           if (oldThread) {
-            const newThreads = s.threads.map(t => 
+            const newThreads = s.threads.map(t =>
               t.id === threadId ? { ...t, id: response.conversation_id! } : t
             );
             const newMessagesByThread = { ...s.messagesByThread };
             newMessagesByThread[response.conversation_id!] = newMessagesByThread[threadId];
             delete newMessagesByThread[threadId];
-            
+
             return {
               threads: newThreads,
               messagesByThread: newMessagesByThread,
@@ -307,10 +335,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
           return s;
         });
       }
-      
+
     } catch (error) {
       console.error('Failed to send message:', error);
-      
+
       let errorMessage = 'Failed to send message. Please try again.';
       if (error instanceof BackendAPIError) {
         if (error.status === 0) {
@@ -319,7 +347,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           errorMessage = error.detail || error.message;
         }
       }
-      
+
       // Add error message
       const errorMsg: Message = {
         id: nanoid(),
@@ -327,10 +355,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
         content: `Sorry, I encountered an error: ${errorMessage}`,
         createdAt: Date.now()
       };
-      
+
       set((s) => {
         const msgs = (s.messagesByThread[threadId] || []).concat(errorMsg);
-        return { 
+        return {
           messagesByThread: { ...s.messagesByThread, [threadId]: msgs },
           error: errorMessage
         };
@@ -343,7 +371,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   deleteThread: async (threadId: string) => {
     const authState = useAuthStore.getState();
-    
+
     if (authState.user?._id) {
       try {
         await conversationAPI.deleteConversation(threadId);
@@ -352,17 +380,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
         // Continue with local deletion even if backend fails
       }
     }
-    
+
     set((s) => {
       const newThreads = s.threads.filter(t => t.id !== threadId);
       const newMessagesByThread = { ...s.messagesByThread };
       delete newMessagesByThread[threadId];
-      
+
       // If we deleted the active thread, select the first available thread
-      const newActiveThreadId = s.activeThreadId === threadId 
+      const newActiveThreadId = s.activeThreadId === threadId
         ? (newThreads.length > 0 ? newThreads[0].id : null)
         : s.activeThreadId;
-      
+
       return {
         threads: newThreads,
         messagesByThread: newMessagesByThread,
@@ -373,14 +401,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   updateThreadTitle: async (threadId: string, title: string) => {
     const authState = useAuthStore.getState();
-    
+
     // Update locally first
     set((s) => ({
-      threads: s.threads.map(t => 
+      threads: s.threads.map(t =>
         t.id === threadId ? { ...t, title, updatedAt: Date.now() } : t
       )
     }));
-    
+
     // Update in backend if authenticated
     if (authState.user?._id) {
       try {

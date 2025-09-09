@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useChatStore } from "@/store/chat.store";
 import { Plus, MoreHorizontal, Trash2, Edit3 } from "lucide-react";
+import ConversationHistory from "./ConversationHistory";
 
 export default function ThreadList() {
   const threads = useChatStore((s) => s.threads);
@@ -13,7 +14,7 @@ export default function ThreadList() {
   const updateThreadTitle = useChatStore((s) => s.updateThreadTitle);
   const isLoading = useChatStore((s) => s.isLoading);
   const isLoadingHistory = useChatStore((s) => s.isLoadingHistory);
-  
+
   const [contextMenuId, setContextMenuId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -23,7 +24,7 @@ export default function ThreadList() {
     const handleClickOutside = () => {
       setContextMenuId(null);
     };
-    
+
     if (contextMenuId) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
@@ -94,13 +95,14 @@ export default function ThreadList() {
           onClick={handleCreateThread}
           disabled={isLoading}
         >
-          <Plus className={`h-4 w-4 transition-transform duration-200 group-hover:rotate-90 ${isLoading ? 'animate-spin' : ''}`} /> 
+          <Plus className={`h-4 w-4 transition-transform duration-200 group-hover:rotate-90 ${isLoading ? 'animate-spin' : ''}`} />
           <span>{isLoading ? 'Creating...' : 'New'}</span>
         </button>
       </div>
-      
+
       {/* Thread List */}
       <div className="flex-1 space-y-2 overflow-y-auto">
+        {/* Current/Active Threads */}
         {threads.length === 0 && !isLoadingHistory ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-secondary/10">
@@ -112,13 +114,12 @@ export default function ThreadList() {
         ) : (
           threads.map((t, index) => (
             <div key={t.id} className="relative">
-              <button
+              <div
                 onClick={() => selectThread(t.id)}
-                className={`group w-full rounded-2xl p-4 text-left transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] animate-slide-up relative ${
-                  activeId === t.id 
-                    ? "glass bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 shadow-lg shadow-primary/10" 
-                    : "hover:bg-card/30 hover:shadow-md"
-                }`}
+                className={`group w-full rounded-2xl p-4 text-left transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] animate-slide-up relative cursor-pointer ${activeId === t.id
+                  ? "glass bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 shadow-lg shadow-primary/10"
+                  : "hover:bg-card/30 hover:shadow-md"
+                  }`}
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -136,9 +137,8 @@ export default function ThreadList() {
                           onClick={(e) => e.stopPropagation()}
                         />
                       ) : (
-                        <p className={`text-sm font-semibold truncate transition-colors duration-200 ${
-                          activeId === t.id ? "text-primary" : "text-foreground group-hover:text-primary"
-                        }`}>
+                        <p className={`text-sm font-semibold truncate transition-colors duration-200 ${activeId === t.id ? "text-primary" : "text-foreground group-hover:text-primary"
+                          }`}>
                           {t.title}
                         </p>
                       )}
@@ -150,7 +150,7 @@ export default function ThreadList() {
                       {t.lastMessagePreview || "New conversation"}
                     </p>
                   </div>
-                  
+
                   {/* Context Menu Button */}
                   <button
                     onClick={(e) => {
@@ -161,15 +161,15 @@ export default function ThreadList() {
                   >
                     <MoreHorizontal className="h-3 w-3" />
                   </button>
-                  
+
                   {activeId === t.id && (
                     <div className="mt-1 text-primary transition-transform duration-200 group-hover:scale-110">
                       <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                     </div>
                   )}
                 </div>
-              </button>
-              
+              </div>
+
               {/* Context Menu */}
               {contextMenuId === t.id && (
                 <div className="absolute right-2 top-12 z-50 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[120px]">
@@ -192,6 +192,9 @@ export default function ThreadList() {
             </div>
           ))
         )}
+
+        {/* Conversation History */}
+        <ConversationHistory />
       </div>
     </div>
   );

@@ -281,8 +281,8 @@ class APIClient {
     if (params?.modelId) queryParams.append('modelId', params.modelId);
 
     const query = queryParams.toString();
-    return this.makeAuthServiceRequest<ConversationListResponse>(
-      `/conversations${query ? `?${query}` : ''}`,
+    return this.makeRequest<ConversationListResponse>(
+      `/api/conversations${query ? `?${query}` : ''}`,
       {},
       true
     );
@@ -292,8 +292,8 @@ class APIClient {
    * Get specific conversation by ID
    */
   async getConversationById(conversationId: string): Promise<ConversationResponse> {
-    return this.makeAuthServiceRequest<ConversationResponse>(
-      `/conversations/${conversationId}`,
+    return this.makeRequest<ConversationResponse>(
+      `/api/conversations/${conversationId}`,
       {},
       true
     );
@@ -303,8 +303,8 @@ class APIClient {
    * Create new conversation
    */
   async createConversation(request: CreateConversationRequest): Promise<ConversationResponse> {
-    return this.makeAuthServiceRequest<ConversationResponse>(
-      '/conversations',
+    return this.makeRequest<ConversationResponse>(
+      '/api/conversations',
       {
         method: 'POST',
         body: JSON.stringify(request),
@@ -320,8 +320,8 @@ class APIClient {
     conversationId: string,
     message: AddMessageRequest
   ): Promise<{ success: boolean; message: string; data: { conversationId: string; messageCount: number } }> {
-    return this.makeAuthServiceRequest(
-      `/conversations/${conversationId}/messages`,
+    return this.makeRequest(
+      `/api/conversations/${conversationId}/messages`,
       {
         method: 'POST',
         body: JSON.stringify(message),
@@ -337,8 +337,8 @@ class APIClient {
     conversationId: string,
     title: string
   ): Promise<{ success: boolean; message: string }> {
-    return this.makeAuthServiceRequest(
-      `/conversations/${conversationId}/title`,
+    return this.makeRequest(
+      `/api/conversations/${conversationId}/title`,
       {
         method: 'PATCH',
         body: JSON.stringify({ title }),
@@ -351,8 +351,8 @@ class APIClient {
    * Delete conversation
    */
   async deleteConversation(conversationId: string): Promise<{ success: boolean; message: string }> {
-    return this.makeAuthServiceRequest(
-      `/conversations/${conversationId}`,
+    return this.makeRequest(
+      `/api/conversations/${conversationId}`,
       { method: 'DELETE' },
       true
     );
@@ -371,8 +371,31 @@ class APIClient {
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
 
-    return this.makeAuthServiceRequest<ConversationListResponse>(
-      `/conversations/search?${queryParams.toString()}`,
+    return this.makeRequest<ConversationListResponse>(
+      `/api/conversations/search?${queryParams.toString()}`,
+      {},
+      true
+    );
+  }
+
+  /**
+   * Get conversation statistics
+   */
+  async getConversationStats(): Promise<{
+    totalConversations: number;
+    totalMessages: number;
+    averageMessagesPerConversation: number;
+    mostActiveDay: string;
+    favoriteTopics: string[];
+  }> {
+    return this.makeRequest<{
+      totalConversations: number;
+      totalMessages: number;
+      averageMessagesPerConversation: number;
+      mostActiveDay: string;
+      favoriteTopics: string[];
+    }>(
+      '/api/conversations/stats',
       {},
       true
     );
@@ -422,4 +445,7 @@ export const conversationAPI = {
 
   searchConversations: (params: { q: string; page?: number; limit?: number }) =>
     apiClient.searchConversations(params),
+
+  getStats: () =>
+    apiClient.getConversationStats(),
 };

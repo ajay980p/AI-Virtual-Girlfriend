@@ -2,10 +2,16 @@
 
 import { useChatStore } from "@/store/chat.store";
 import { useUIStore } from "@/store/ui.store";
+import { useMemo } from "react";
 
 export default function ChatMessages() {
     const activeThreadId = useChatStore((s) => s.activeThreadId);
-    const messages = useChatStore((s) => (activeThreadId ? s.messagesByThread[activeThreadId] || [] : []));
+    const messagesByThread = useChatStore((s) => s.messagesByThread);
+
+    const messages = useMemo(() => {
+        if (!activeThreadId) return [];
+        return messagesByThread[activeThreadId] || [];
+    }, [activeThreadId, messagesByThread]);
     const typing = useUIStore((s) => s.assistantTyping);
 
     return (
