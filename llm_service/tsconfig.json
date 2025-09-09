@@ -8,10 +8,15 @@
         "strict": true,
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "typeRoots": [
+            "./src/types",
+            "./node_modules/@types"
+        ]
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "types",
     ],
     "exclude": [
         "node_modules",

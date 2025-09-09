@@ -3,13 +3,19 @@ import { ChatRequest, ChatResponse } from '../types/chat';
 import { generateChatResponse } from '../services/memory.service';
 import { getAuthClient } from '../services/auth.service';
 
-export async function respondToUser(req: Request<unknown, unknown, ChatRequest>, res: Response<ChatResponse | { message: string }>) {
+// Handle an incoming chat request, generating an AI response and optionally persisting conversation/messages.
+// The request body is typed via ChatRequest and req.user comes from express request augmentation in src/types/express.d.ts.
+export async function respondToUser(
+    req: Request<{}, ChatResponse | { message: string }, ChatRequest>,
+    res: Response<ChatResponse | { message: string }>
+) {
     try {
-        const payload = req.body;
+        const payload = req.body as ChatRequest; // explicit for clarity
         if (!payload?.message || !payload.message.trim()) {
             return res.status(400).json({ message: 'Message cannot be empty' } as any);
         }
-        const effectiveUserId = req.user?.userId || payload.user_id;
+        // req.user is attached by auth middleware (id, email, roles, token)
+        const effectiveUserId = req.user?.id || payload.user_id;
         if (!effectiveUserId || !String(effectiveUserId).trim()) {
             return res.status(400).json({ message: 'User ID cannot be empty' } as any);
         }
@@ -17,7 +23,8 @@ export async function respondToUser(req: Request<unknown, unknown, ChatRequest>,
         const aiResponse = await generateChatResponse({ user_id: effectiveUserId, message: payload.message });
 
         let conversationId = payload.conversation_id || undefined;
-        const token = req.token || payload.auth_token || undefined;
+        // Prefer token from authenticated user, fallback to explicit auth_token in body
+        const token = req.user?.token || payload.auth_token || undefined;
         const authClient = getAuthClient();
 
         if (token) {
