@@ -27,26 +27,26 @@ export async function respondToUser(
         const token = req.user?.token || payload.auth_token || undefined;
         const authClient = getAuthClient();
 
-        if (token) {
-            try {
-                if (!conversationId) {
-                    const title = payload.message.slice(0, 50) + (payload.message.length > 50 ? '...' : '');
-                    conversationId = await authClient.createConversation({
-                        userId: String(effectiveUserId),
-                        title,
-                        authToken: token,
-                    }) || undefined;
-                }
-                if (conversationId) {
-                    await authClient.addMessage({ conversationId, role: 'user', content: payload.message, authToken: token });
-                    await authClient.addMessage({ conversationId, role: 'assistant', content: aiResponse, authToken: token });
-                }
-            } catch (e) {
-                // non-fatal
-                // eslint-disable-next-line no-console
-                console.error('Conversation persistence error:', e);
-            }
-        }
+        // if (token) {
+        //     try {
+        //         if (!conversationId) {
+        //             const title = payload.message.slice(0, 50) + (payload.message.length > 50 ? '...' : '');
+        //             conversationId = await authClient.createConversation({
+        //                 userId: String(effectiveUserId),
+        //                 title,
+        //                 authToken: token,
+        //             }) || undefined;
+        //         }
+        //         if (conversationId) {
+        //             await authClient.addMessage({ conversationId, role: 'user', content: payload.message, authToken: token });
+        //             await authClient.addMessage({ conversationId, role: 'assistant', content: aiResponse, authToken: token });
+        //         }
+        //     } catch (e) {
+        //         // non-fatal
+        //         // eslint-disable-next-line no-console
+        //         console.error('Conversation persistence error:', e);
+        //     }
+        // }
 
         return res.json({ response: aiResponse, conversation_id: conversationId });
     } catch (e: any) {

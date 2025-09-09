@@ -6,6 +6,7 @@ import { config } from './config';
 import { setupSwagger } from './config/swagger';
 import { router } from "./routes/index"
 import dotenv from 'dotenv';
+import { authMiddleware } from './middleware/auth.middleware';
 dotenv.config(); // MUST come before importing config
 
 const app = express();
@@ -23,6 +24,9 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(morgan('dev'));
+
+app.use(authMiddleware);
+
 
 // API routes
 app.use("/api", router);
