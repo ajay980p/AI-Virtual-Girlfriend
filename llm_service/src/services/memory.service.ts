@@ -1,6 +1,6 @@
 import { embedText } from './embedding.service';
 import { queryMemories, storeMemory } from './pinecone.service';
-import { generateResponse } from './llm.service';
+import { generateResponse } from './response.service';
 
 export async function generateChatResponse(payload: { user_id: string; message: string; }): Promise<string> {
     // Embed user send text into vector
