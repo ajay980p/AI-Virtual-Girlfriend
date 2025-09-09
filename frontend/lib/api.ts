@@ -235,7 +235,7 @@ class APIClient {
    * Send a chat message and get AI response
    */
   async sendChatMessage(request: ChatRequest): Promise<ChatResponse> {
-    return this.makeRequest<ChatResponse>('/chat/respond', {
+    return this.makeRequest<ChatResponse>('/api/chat/respond', {
       method: 'POST',
       body: JSON.stringify(request),
     }, true); // Include auth
